@@ -6,7 +6,8 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meiduo_mall.settings')
+    # 第二个参数meiduo_mall.settings.dev 指定配置环境为开发环境。dev实际就是之前的setting
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meiduo_mall.settings.dev')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

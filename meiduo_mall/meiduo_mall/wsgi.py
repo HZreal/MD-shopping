@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meiduo_mall.settings')
+# 第二个参数指定配置环境为生产环境
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meiduo_mall.settings.prod')
 
 application = get_wsgi_application()
