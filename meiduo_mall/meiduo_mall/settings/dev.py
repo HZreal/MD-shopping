@@ -13,18 +13,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import os    # 早期dirs列表设置模板路径用os.path.join()
+import os, sys     # 早期dirs列表设置模板路径用os.path.join()
 from pathlib import Path
+
+# 查看导包路径
+# print(sys.path)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # 注意：本文件路径为meiduo_mall/meiduo_mall/settings/dev.py
-# BASE_DIR = Path(__file__).resolve().parent.parent                 # BASE_DIR指向 meiduo_mall/meiduo_mall/
-BASE_DIR = Path(__file__).resolve().parent.parent.parent            # BASE_DIR指向 meiduo_mall/
+BASE_DIR = Path(__file__).resolve().parent.parent                     # BASE_DIR指向 meiduo_mall/meiduo_mall/
+# BASE_DIR = Path(__file__).resolve().parent.parent.parent            # BASE_DIR指向 meiduo_mall/
 # print(__file__)
 # print(Path(__file__))
-# print(Path(__file__).resolve())                                   # 这三个输出结果均是 F:\Django\bookmanager\bookmanager\settings.py
-# print(Path(__file__).resolve().parent)                            # F:\Django\bookmanager\bookmanager
-# print(BASE_DIR)                                                   # F:\Django\bookmanager
+# print(Path(__file__).resolve())                                    # 这三个输出结果均是 F:\Django\bookmanager\bookmanager\settings.py
+# print(Path(__file__).resolve().parent)                             # F:\Django\bookmanager\bookmanager
+# print(BASE_DIR)                                                    # F:\Django\bookmanager
 # 早期版本如下
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 其中__file__表示本文件setting.py文件名
@@ -54,7 +58,8 @@ ALLOWED_HOSTS = ['localhost',
                  '192.168.0.103',
                  ]
 
-
+# sys.path.insert(0,os.path.join(BASE_DIR.parent,'abc'))      测试包abc里放人子应用
+# sys.path.insert(0,os.path.join(BASE_DIR,'apps'))       # 与将apps标记为源根作用相同
 # Application definition
 # 安装注册子应用
 INSTALLED_APPS = [
@@ -64,6 +69,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 注册子应用
+    # 所有子应用都在包apps中，必须将包apps标记为源根，或者sys.path.insert()插入路径
+    'meiduo_mall.apps.users',
+    # 'users',
+    # 'users.apps.UsersConfig',            # 此子应用在工程的meiduo_mall.apps中
+    'huang',                               # 此子应用在工程的abc中， 用来测试
+
+
 ]
 
 
@@ -89,7 +102,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.jinja2.Jinja2',          # jinja2 引擎
         # 此处的BASE_DIR指的是本工程里的meiduo_mall，而非工程本身的meiduo_mall
-        'DIRS': [BASE_DIR / 'meiduo_mall/templates'],                             # 模板文件加载路径
+        'DIRS': [BASE_DIR / 'templates'],                             # 模板文件加载路径
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -227,11 +240,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 # Django是通过STATIC_URL区分动态资源和静态资源
 # Django认定：请求资源http://ip:port + STATIC_URL + 文件名 为静态资源
-# 即STATIC_URL决定是否是静态资源
+# 即STATIC_URL规定是否是静态资源
 STATIC_URL = '/static/'
 
-# 静态文件路由，告知系统静态文件路径
-
+# 告知系统静态文件加载路径，目前开发环境放在工程中，部署上线则放在Nginx代理服务器
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',             # os.path.join(BASE_DIR, 'static')
+]
 
 
 
@@ -270,8 +285,7 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             # 'filename': os.path.join(os.path.dirname(BASE_DIR), 'logs/meiduo.log'),
-            # 'filename': os.path.join(BASE_DIR, 'logs/meiduo.log'),
-            'filename': BASE_DIR / 'logs/meiduo.log',                                     # 日志文件的位置
+            'filename': BASE_DIR.parent / 'logs/meiduo.log',                                     # 日志文件的位置
             'maxBytes': 300 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'verbose'
