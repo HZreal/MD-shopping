@@ -1,5 +1,5 @@
 # 开发环境的配置文件，在manage.py中声明
-
+# global_settings.py是全局配置信息，描述的更详细
 
 """
 Django settings for meiduo_mall project.
@@ -16,25 +16,29 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os, sys     # 早期dirs列表设置模板路径用os.path.join()
 from pathlib import Path
 
-# 查看导包路径
-# print(sys.path)
+
+# 查看导包路径(或者说模块搜索路径PYTHONPATH，或者说源根,)
+# print(sys.path)            # PYTHONPATH，是一个列表，python解释器对模块的搜索按列表中的顺序搜索
+# ['F:\\Django\\meiduo\\meiduo_mall',
+# 'F:\\Django\\meiduo',
+# 'F:\\Django\\meiduo\\meiduo_mall\\meiduo_mall\\apps',                # 将自定义包apps放到源根列表，告知解释器可以在apps/这个目录去找模块
+# 'F:\\virtualenvs\\py3_django_1\\lib\\site-packages',  ... ]
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-# 注意：本文件路径为meiduo_mall/meiduo_mall/settings/dev.py
-BASE_DIR = Path(__file__).resolve().parent.parent                     # BASE_DIR指向 meiduo_mall/meiduo_mall/
-# BASE_DIR = Path(__file__).resolve().parent.parent.parent            # BASE_DIR指向 meiduo_mall/
+# 注意：本模块路径为meiduo_mall/meiduo_mall/settings/dev.py
+BASE_DIR = Path(__file__).resolve().parent.parent                      # BASE_DIR指向 meiduo_mall/meiduo_mall/
+# BASE_DIR = Path(__file__).resolve().parent.parent.parent             # BASE_DIR指向 meiduo_mall/
 # print(__file__)
 # print(Path(__file__))
-# print(Path(__file__).resolve())                                    # 这三个输出结果均是 F:\Django\bookmanager\bookmanager\settings.py
-# print(Path(__file__).resolve().parent)                             # F:\Django\bookmanager\bookmanager
-# print(BASE_DIR)                                                    # F:\Django\bookmanager
+# print(Path(__file__).resolve())                                      # 这三个输出结果均是 F:\Django\meiduo\meiduo_mall\meiduo_mall\settings\dev.py 即本模块路径
+# print(Path(__file__).resolve().parent)                               # F:\Django\meiduo\meiduo_mall\meiduo_mall\settings
+# print(BASE_DIR)                                                      # F:\Django\meiduo\meiduo_mall\meiduo_mall
 # 早期版本如下
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# 其中__file__表示本文件setting.py文件名
-# abspath(__file__)获取本文件绝对路径 F:\Django\bookmanager\bookmanager\settings.py
-# dirname获取本文件所在文件夹(目录)路径 F:\Django\bookmanager\bookmanager 即获取父级目录
-# 外层dirname再取上上级文件夹路径 F:\Django\bookmanager 即是BASE_DIR
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))                  # __file__表示本模块dev.py文件名
+# abspath(__file__)获取本模块绝对路径 F:\Django\meiduo\meiduo_mall\meiduo_mall\settings\dev.py
+# dirname获取本模块所在的目录路径 F:\Django\meiduo\meiduo_mall\meiduo_mall\settings 即获取父级目录
+# 外层dirname再取上上级目录路径 F:\Django\meiduo\meiduo_mall\meiduo_mall 即是BASE_DIR
 
 
 
@@ -58,23 +62,27 @@ ALLOWED_HOSTS = ['localhost',
                  '192.168.0.103',
                  ]
 
-# sys.path.insert(0,os.path.join(BASE_DIR.parent,'abc'))      测试包abc里放人子应用
-# sys.path.insert(0,os.path.join(BASE_DIR,'apps'))       # 与将apps标记为源根作用相同
-# Application definition
+
+# 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
+AUTH_USER_MODEL = 'users.User'                     # 语法： 子应用名.模型类名
+
+
+# sys.path.insert(列表下标, 路径)       # 插入模块搜索路径(导包路径)
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))       # 表示将包apps插入到源根列表，或者说插入到导包路径，或者说模块搜索路径
+# 通过右击apps—>mark as—>source root 直接将apps目录路径写到PYTHONPATH中，可以解决安装子应用的问题，但是生成迁移文件时会报错，找不到users
+
 # 安装注册子应用
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.admin',                         # admin子应用，Django后台管理系统
+    'django.contrib.auth',                          # auth子应用，Django默认的用户认证系统
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.sessions',                      # sessions子应用
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 注册子应用
-    # 所有子应用都在包apps中，必须将包apps标记为源根，或者sys.path.insert()插入路径
-    'meiduo_mall.apps.users',
-    # 'users',
-    # 'users.apps.UsersConfig',            # 此子应用在工程的meiduo_mall.apps中
-    'huang',                               # 此子应用在工程的abc中， 用来测试
+    # 'meiduo_mall.apps.users',                     # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
+    'users',                                        # 所有子应用都定义在包apps中，将包apps标记为源根(路径放到sys.path即PYTHONPATH列表中)，通过apps这个源根找到
+    # 'users.apps.UsersConfig',
 
 
 ]
@@ -169,7 +177,7 @@ CACHES = {
     # 默认存储在0号库
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",                    # 去找中间件
-        # "LOCATION": "redis://127.0.0.1:6379/0",                      # 本机redis的0号库
+        # "LOCATION": "redis://127.0.0.1:6379/0",                      # 网络通信三要素：协议，ip，port
         "LOCATION": "redis://192.168.94.131:6379/0",                   # 远程redis的0号库
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -260,8 +268,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 日志配置信息
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
-    'formatters': {                            # 日志信息显示的格式
+    'disable_existing_loggers': False,         # 是否禁用已经存在的日志器
+    'formatters': {                            # 日志信息输出显示的格式
         'verbose': {                           # 描述详细
             'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
         },
@@ -274,28 +282,42 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
-    'handlers': {                             # 日志处理方法
-        'console': {                          # 向终端中输出日志
+    'handlers': {                               # 日志处理方式
+        'console': {                            # 向终端中输出日志
             'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        'file': {                            # 向文件中输出日志
+        'file': {                                # 向文件中输出日志
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             # 'filename': os.path.join(os.path.dirname(BASE_DIR), 'logs/meiduo.log'),
-            'filename': BASE_DIR.parent / 'logs/meiduo.log',                                     # 日志文件的位置
-            'maxBytes': 300 * 1024 * 1024,
-            'backupCount': 10,
+            'filename': BASE_DIR.parent / 'logs/meiduo.log',                                     # 日志文件的存放位置
+            'maxBytes': 300 * 1024 * 1024,                       # 每个日志文件的大小
+            'backupCount': 10,                                   # 日志文件个数(一个文件存满自动生成下一个)
             'formatter': 'verbose'
         },
+
+        # 若日志文件不够，还可再建，如'file1':{ },
     },
-    'loggers': {                                       # 日志器
-        'django': {                                    # 定义了一个名为django的日志器
-            'handlers': ['console', 'file'],           # 可以同时向终端与文件中输出日志
-            'propagate': True,                         # 是否继续传递日志信息
-            'level': 'INFO',                            # 日志器接收的最低日志级别
+
+    'loggers': {                                                # 日志器
+        'django': {                                             # 定义了一个名为django的日志器
+            'handlers': ['console', 'file'],                    # 可以同时向终端与文件中输出日志
+            'propagate': True,                                  # 是否继续传递日志信息
+            'level': 'INFO',                                    # 日志器接收的最低日志级别
         },
+
+        # 可再建，如'django1': { },
     }
 }
+
+
+# import logging
+# # 创建日志记录器对象，参数django就是LOGGING里loggers的配置信息
+# logger = logging.getLogger('django')
+# # 输出日志
+# logger.debug('测试logging模块debug')
+# logger.info('测试logging模块info')
+# logger.error('测试logging模块error')
