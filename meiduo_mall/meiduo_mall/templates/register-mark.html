@@ -3,16 +3,17 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<title>美多商城-注册</title>
-	<link rel="stylesheet" type="text/css" href="{{ static('css/reset.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
+	<link rel="stylesheet" type="text/css" href="../static/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/main.css">
 
-{#    <script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>    #}
+{#    <script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>    #}   {#  版本太低，不支持@click写法   #}
     <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-{#   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>         #}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>                        {#    导入vue    #}
+{#   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>         #}               {#    导入axios   #}
 </head>
 <body>
+{#   定义一个div容器宝哥整个body，使vue能够全部控制   #}
 <div id="app">
 	<div class="register_con">
 		<div class="l_con fl">
@@ -26,18 +27,20 @@
 				<a href="login.html">登录</a>
 			</div>
 			<div class="reg_form clearfix">
-				<form method="post" class="register_form" @submit="on_submit" v-cloak>
+{#                submit提交事件  v-cloak设置表单数据绑定完成再显示，避免前端页面刷新延迟导致显示了绑定变量     #}
+				<form method="post" class="register_form" @submit="on_submit" v-cloak="">
 				    {{ csrf_input }}
 					<ul>
 						<li>
 							<label>用户名:</label>
+{#                            blur设置鼠标失去焦点    v-show设置错误信息是否显示    #}
 							<input type="text" v-model="username" @blur="check_username" name="username" id="user_name">
-							<span class="error_tip" v-show="error_name">[[ error_name_message ]]</span>
+							<span class="error_tip" v-show="error_name">{{ error_name_message }}</span>
 						</li>					
 						<li>
 							<label>密码:</label>
 							<input type="password" v-model="password" @blur="check_password" name="password" id="pwd">
-							<span class="error_tip" v-show="error_password">请输入8-20位的密码，首位非数字</span>
+							<span class="error_tip" v-show="error_password">请输入8-20位的密码</span>
 						</li>
 						<li>
 							<label>确认密码:</label>
@@ -47,7 +50,7 @@
 						<li>
 							<label>手机号:</label>
 							<input type="text" v-model="mobile" @blur="check_mobile" name="mobile" id="phone">
-							<span class="error_tip" v-show="error_mobile">[[ error_mobile_message ]]</span>
+							<span class="error_tip" v-show="error_mobile">{{ error_mobile_message }}</span>
 						</li>
 						<li>
 							<label>图形验证码:</label>
@@ -62,7 +65,7 @@
 							<span class="error_tip">请填写短信验证码</span>
 						</li>
 						<li class="agreement">
-							<input type="checkbox" v-model="allow" @change="check_allow" name="allow" id="allow">
+							<input type="checkbox" @change="check_allow" name="allow" id="allow">
 							<label>同意”美多商城用户使用协议“</label>
 							<span class="error_tip" v-show="error_allow">请勾选用户协议</span>
 						</li>
@@ -88,6 +91,7 @@
 		<p>电话：010-****888    京ICP备*******8号</p>
 	</div>
 </div>
+{#  导入自定义前端逻辑的js文件  #}
 <script src="{{ static('js/register.js') }}"></script>
 </body>
 </html>

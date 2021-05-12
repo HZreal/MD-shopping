@@ -5,12 +5,12 @@ from django.views import View
 
 
 class RegisterView(View):
-    def get(self, request):            # 返回注册页面
+    # 获取注册页面
+    def get(self, request):
         return render(request, 'register.html')
 
-
-
-    def post(self,request):            # 处理用户注册信息
+    # 后端用户注册逻辑接口
+    def post(self,request):
         pass
 
 
