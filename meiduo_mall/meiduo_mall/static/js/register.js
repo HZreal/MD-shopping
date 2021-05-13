@@ -8,7 +8,7 @@
 
 let vm = new Vue({
     el: '#app',
-    delimiters: ['[[', ']]'],                       // 修改Vue变量的读取语法，避免和Django模板语法冲突
+    delimiters: ['[[', ']]'],                       // 修改Vue变量的读取语法，避免和jinja2模板语法冲突，后端模板变量用{{  }}
     data: {
 
         //v-model 接收用户输入信息
@@ -32,12 +32,33 @@ let vm = new Vue({
     },
 
     methods: {
+
         // 校验用户名
         // test()方法 检查字符串是否与给出的正则表达式模式相匹配，匹配成功返回true，否则返回 false
         check_username(){
             let re = /^[a-zA-Z][0-9a-zA-Z_]{4,19}$/;                       // 首位只能是字母，总长5-20位
             if(re.test(this.username)){
                 this.error_name = false;
+
+                // 用户输入的用户名格式合法，才去发送axios请求给后端判断是否重复
+                let url = '/usernames/' + this.username + '/count/'
+                axios.get(url, {
+                    responseType: 'json',
+                }).then((response) => {
+                    // console.log(response);
+                    console.log(typeof(response.data));
+                    count = response.data.count;                   // data是一个对象
+                    if(count == 1){
+                        this.error_name_message = '用户名已存在';
+                        this.error_name = true;
+                    }
+                    else {
+                        this.error_name = false;
+                    }
+                }).catch((error) => {
+                    console.log(error)
+                });
+
             }
             else {
                 this.error_name_message = '请输入5-20位字符的用户名，首位只能是字母';
@@ -69,6 +90,24 @@ let vm = new Vue({
             let re = /^1[34578]\d{9}$/;
             if(re.test(this.mobile)){
                 this.error_mobile = false;
+
+                // 手机号格式合法，则发送axios请求给后端，判断手机号是否重复
+                let url = '/mobiles/' + this.mobile + '/count/'
+                axios.get(url, {
+                    responseType: 'json',
+                }).then((response) => {
+                    count = response.data.count;
+                    if(count == 1){
+                        this.error_mobile_message = '手机号已存在';
+                        this.error_mobile = true;
+                    }
+                    else {
+                        this.error_mobile = false;
+                    }
+                }).catch((error) => {
+                    console.log(error)
+                });
+
             }
             else {
                 this.error_mobile_message = '您输入的手机号格式不正确'

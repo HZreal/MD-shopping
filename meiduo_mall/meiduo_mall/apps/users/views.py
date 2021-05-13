@@ -1,12 +1,42 @@
-
-from django.shortcuts import render
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
 from django import http
 # from models import User           # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
-from users.models import User       # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
+from django.urls import reverse
 
+from users.models import User       # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
 from django.views import View
 import re
 from django.db import DatabaseError
+from meiduo_mall.utils.response_code import RETCODE             # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
+
+# 接收axios请求，判断注册的用户名是否重复
+class UsernameCountView(View):
+    def get(self, request, username):                # username接收请求路由url参数
+        # 接收校验参数：路径参数正则匹配已完成
+        # 使用username查询数据库中名为username的记录条数,
+        count = User.objects.filter(username=username).count()
+
+        # 响应结果：发送json数据
+        data = {
+            'status': RETCODE.OK,                          # 状态码
+            'error_mesaage': 'OK',                         # 错误提示信息
+            'count': count,                                # 记录条数
+        }
+        return http.JsonResponse(data)
+
+
+# 接收axios请求，判断注册的手机号是否重复
+class MobileCountView(View):
+    def get(self, request, mobile):
+        count = User.objects.filter(mobile=mobile).count()
+        data = {
+            'status': RETCODE.OK,
+            'error_message': 'OK',
+            'count': count,
+        }
+        return http.JsonResponse(data)
+
 
 class RegisterView(View):
     # 获取注册页面
@@ -44,11 +74,21 @@ class RegisterView(View):
         try:
             user = User.objects.create_user(username=username, password=password, mobile=mobile)
         except DatabaseError:
-            return render(request, 'register.html', context={'register': '注册失败'})
+            return render(request, 'register.html', context={'register_error_message': '注册失败'})
+         # 测试注册失败错误提示信息(页面整体刷新)
+        # return render(request, 'register.html', context={'register_error_message': '注册失败'})
 
+        # 实现状态保持(保存注册数据成功入库之后，响应之前)
+        # 需求一：注册成功后即表示用户登入成功，转入首页，那么此时可以在注册成功后实现状态保持
+        # 需求二：注册成功后不表示用户登入成功，转入登录页面让用户登录，那么此时不用在注册成功后实现状态保持，而是等用户登录后转入首页实现状态保持
+        # 这里做需求一：
+        # Django用户认证系统(auth子应用)提供了login()方法。封装了写入session的操作，帮助我们快速登入一个用户，并实现状态保持，详看源码
+        login(request, user)
 
-        # 响应结果
-        return http.HttpResponse('注册成功，重定向到首页')
+        # 响应结果：注册成功，重定向到首页路径 '/'  给用户传sessionid,csrftoken等cookie信息
+        # return redirect(reverse('namespace:name'))
+        return redirect(reverse('contents:index'))
+
 
 
 

@@ -86,9 +86,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 注册子应用
     # 'meiduo_mall.apps.users',                         # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
-    'users',                                            # 所有子应用都定义在包apps中，将包apps标记为源根(路径放到sys.path即PYTHONPATH列表中)，通过apps这个源根找到
+    'users',                                            # 所有子应用都定义在包apps中，
     # 'users.apps.UsersConfig',
-
+    'contents',                                         # 首页广告模块
 
 ]
 

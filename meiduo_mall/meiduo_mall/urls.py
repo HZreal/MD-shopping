@@ -20,7 +20,15 @@ from django.urls import path, include,re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(('users.urls', 'users'), namespace='users')),                  # users
+
+    # path('', include('users.urls')),
+    path('', include(('users.urls', 'users'), namespace='users')),                  # users 指定命名空间，必须设置app_name
     # re_path(r'^$', include('users.urls')),                                        # TODO 所有路由在总路由校验匹配
     # re_path(r'^', include(('users.urls', 'users'), namespace='users')),           # TODO 所有路由在总路由中不校验匹配，只负责开始，由子应用去校验匹配
+
+    path('', include(('contents.urls', 'contents'), namespace='index')),
+
+
+
+
 ]

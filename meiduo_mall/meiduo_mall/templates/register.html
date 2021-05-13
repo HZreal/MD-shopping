@@ -65,7 +65,10 @@
 							<input type="checkbox" v-model="allow" @change="check_allow" name="allow" id="allow">
 							<label>同意”美多商城用户使用协议“</label>
 							<span class="error_tip" v-show="error_allow">请勾选用户协议</span>
-						</li>
+                            {% if register_error_message %}
+                                <span class="error_tip">{{ register_error_message }}</span>
+                            {% endif %}
+                        </li>
 						<li class="reg_sub">
 							<input type="submit" value="注 册">
 						</li>
