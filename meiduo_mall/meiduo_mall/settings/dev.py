@@ -17,13 +17,6 @@ import os, sys     # 早期dirs列表设置模板路径用os.path.join()
 from pathlib import Path
 
 
-# 查看导包路径(或者说模块搜索路径PYTHONPATH，或者说源根,)
-# print(sys.path)            # PYTHONPATH，是一个列表，python解释器对模块的搜索按列表中的顺序搜索
-# ['F:\\Django\\meiduo\\meiduo_mall',
-# 'F:\\Django\\meiduo',
-# 'F:\\Django\\meiduo\\meiduo_mall\\meiduo_mall\\apps',                # 将自定义包apps放到源根列表，告知解释器可以在apps/这个目录去找模块
-# 'F:\\virtualenvs\\py3_django_1\\lib\\site-packages',  ... ]
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # 注意：本模块路径为meiduo_mall/meiduo_mall/settings/dev.py
@@ -64,24 +57,36 @@ ALLOWED_HOSTS = ['localhost',
 
 
 # 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
-AUTH_USER_MODEL = 'users.User'                     # 语法： 子应用名.模型类名
+AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用名.模型类名
 
 
-# sys.path.insert(列表下标, 路径)       # 插入模块搜索路径(导包路径)
-sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))       # 表示将包apps插入到源根列表，或者说插入到导包路径，或者说模块搜索路径
-# 通过右击apps—>mark as—>source root 直接将apps目录路径写到PYTHONPATH中，可以解决安装子应用的问题，但是生成迁移文件时会报错，找不到users
+
+# 查看导包路径(或者说模块搜索路径PYTHONPATH)
+# print(sys.path)                                                     # PYTHONPATH 是一个列表，python解释器对模块的搜索按列表中的顺序搜索
+# ['F:\\Django\\meiduo\\meiduo_mall',
+# 'F:\\Django\\meiduo',
+# 'F:\\virtualenvs\\py3_django_1\\lib\\site-packages',  ... ]
+
+# sys.path.insert(列表下标, 路径)                                     # 插入模块搜索路径(导包路径)
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))                    # 运行才生效！！表示将目录apps/插入到模块搜索路径PYTHONPATH列表中,告知解释器可以在apps/这个目录去找模块
+# print(sys.path)
+# PYTHONPATH列表多了一个路径 'F:\\Django\\meiduo\\meiduo_mall\\meiduo_mall\\apps',       # 此时解释器就可通过目录apps/找到子应用模块了
+
+# TODO 通过右击apps—>mark directory as—>source root 即标记为源根，也会将目录apps/写到PYTHONPATH中，可以解决安装子应用的问题，但是生成迁移文件时会报错，提示找不到模块users (why?) 而采用sys.path.insert，生成迁移文件正常执行
+# 标记为源根：是告诉IDE编译器(pycharm)此文件夹及其子文件夹包含应作为构建过程的一部分进行编译的源代码，也即是pycharm编辑器能找到该模块，但运行代码是解释器进行的，解释器不一定找得到该模块，解释器找模块是通过模块搜索路径顺序查找的
+
 
 # 安装注册子应用
 INSTALLED_APPS = [
-    'django.contrib.admin',                         # admin子应用，Django后台管理系统
-    'django.contrib.auth',                          # auth子应用，Django默认的用户认证系统
+    'django.contrib.admin',                             # admin子应用，Django后台管理系统
+    'django.contrib.auth',                              # auth子应用，Django默认的用户认证系统
     'django.contrib.contenttypes',
-    'django.contrib.sessions',                      # sessions子应用
+    'django.contrib.sessions',                          # sessions子应用
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 注册子应用
-    # 'meiduo_mall.apps.users',                     # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
-    'users',                                        # 所有子应用都定义在包apps中，将包apps标记为源根(路径放到sys.path即PYTHONPATH列表中)，通过apps这个源根找到
+    # 'meiduo_mall.apps.users',                         # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
+    'users',                                            # 所有子应用都定义在包apps中，将包apps标记为源根(路径放到sys.path即PYTHONPATH列表中)，通过apps这个源根找到
     # 'users.apps.UsersConfig',
 
 
