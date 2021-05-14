@@ -89,7 +89,7 @@ INSTALLED_APPS = [
     'users',                                            # 所有子应用都定义在包apps中，
     # 'users.apps.UsersConfig',
     'contents',                                         # 首页广告模块
-
+    'verifications',                                    # 图形验证码
 ]
 
 

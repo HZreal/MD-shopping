@@ -27,6 +27,7 @@ urlpatterns = [
     # re_path(r'^', include(('users.urls', 'users'), namespace='users')),           # TODO 所有路由在总路由中不校验匹配，只负责开始，由子应用去校验匹配
 
     path('', include(('contents.urls', 'contents'), namespace='index')),
+    path('', include('verifications.urls')),
 
 
 
