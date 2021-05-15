@@ -9,6 +9,9 @@ from django.views import View
 import re
 from django.db import DatabaseError
 from meiduo_mall.utils.response_code import RETCODE             # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
+from django_redis import get_redis_connection
+
+
 
 # 接收axios请求，判断注册的用户名是否重复
 class UsernameCountView(View):
@@ -50,12 +53,13 @@ class RegisterView(View):
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
         mobile = request.POST.get('mobile')
+        client_sms_code = request.POST.get('sms_code')
         allow = request.POST.get('allow')
 
         # 校验参数:对前端数据再次校验，保证后端安全，避免黑客绕过前端发送数据。前后端校验逻辑相同
         # 判断参数：1.参数是否齐全，2.用户名合法，3.密码合法，4.确认密码相同，5.手机号合法，6.勾选协议
         # 只要缺少一个参数，或者参数格式有误，禁止此次请求，保证后端后续逻辑安全
-        if not all([username, password, password2, mobile, allow]):                 # all([])判断列表元素是否为空，只要有一个为空则返回false
+        if not all([username, password, password2, mobile, allow, client_sms_code]):                 # all([])判断列表元素是否为空，只要有一个为空则返回false
             # HttpResponseForbidden封装了403响应码
             return http.HttpResponseForbidden('缺少必要参数')
         if not re.match(r'^[a-zA-Z][0-9a-zA-Z_]{4,19}$', username):
@@ -68,6 +72,14 @@ class RegisterView(View):
             return http.HttpResponseForbidden('您输入的手机号格式不正确')
         if not allow == 'on':              # checkbox被勾选时allow的值是'on'字符串
             return http.HttpResponseForbidden('请勾选用户协议')
+
+        # 从redis中取短信验证码
+        redis_conn = get_redis_connection('verify_code')
+        server_sms_code = redis_conn.get('sms_%s' % mobile)
+        if server_sms_code is None:
+            return render(request, 'register.html', {'sms_error_mesaage': '短信验证码无效'})
+        if not client_sms_code == server_sms_code.decode():
+            return render(request, 'register.html', {'sms_error_mesaage': '输入短信验证码有误'})
 
         # 保存用户注册数据
         # create_user()方法内置密码加密，存储到库等操作，访问了外部资源用try

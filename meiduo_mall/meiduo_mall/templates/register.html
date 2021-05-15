@@ -7,10 +7,10 @@
 	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
 
 {#    <script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>    #}
-    <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>
+{#    <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>#}
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-{#   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>         #}
+   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -57,9 +57,12 @@
 						</li>
 						<li>
 							<label>短信验证码:</label>
-							<input type="text" name="sms_code" id="msg_code" class="msg_input">
-							<a href="javascript:;" class="get_msg_code">获取短信验证码</a>
-							<span class="error_tip">请填写短信验证码</span>
+							<input type="text" v-model="sms_code" @blur="check_sms_code" name="sms_code" id="msg_code" class="msg_input">
+							<a @click="send_sms_code" class="get_msg_code">[[ sms_code_tip ]]</a>
+							<span class="error_tip" v-show="error_sms_code">[[ error_sms_code_mesaage ]]</span>
+                            {% if sms_error_mesaage %}
+                                <span class="error_tip">{{ sms_error_mesaage }}</span>
+                            {% endif %}
 						</li>
 						<li class="agreement">
 							<input type="checkbox" v-model="allow" @change="check_allow" name="allow" id="allow">

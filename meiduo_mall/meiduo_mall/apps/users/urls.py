@@ -6,11 +6,15 @@ urlpatterns = [
     # reverse(users:register) —> '/register/'
     # re_path(r'^register/$', views.RegisterView.as_view()),
     path('register/', views.RegisterView.as_view(), name='register'),       # 用户注册
+
     # 用户输入用户名鼠标失去焦点的axios请求，判断注册的用户名是否重复
     re_path(r'^usernames/(?P<username>[a-zA-Z][0-9a-zA-Z_]{4,19})/count/$', views.UsernameCountView.as_view()),
     # path('usernames/<str:username>/count/', views.UsernameCountView.as_view()),
 
+    # 用户输入手机号鼠标失去焦点的axios请求，判断注册的手机号是否重复
     re_path(r'^mobiles/(?P<mobile>1[34578]\d{9})/count/$', views.MobileCountView.as_view()),
+
+
 ]
 
 

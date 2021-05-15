@@ -20,6 +20,7 @@ let vm = new Vue({
         image_code: '',
         image_code_url: '',           // img标签动态的url地址
         uuid: '',
+        sms_code: '',
 
         //v-show 错误信息默认不显示
         error_name: false,
@@ -28,11 +29,19 @@ let vm = new Vue({
         error_mobile: false,
         error_image_code: false,
         error_allow: false,
+        error_sms_code: false,
 
         //error_message 错误提示信息若是固定的，可以使用绑定的变量动态的展示错误提示信息，若固定的直接在标签中写死
         error_name_message: '',
         error_mobile_message: '',
         error_image_code_message: '',
+        error_sms_code_mesaage: '',
+
+        // flag标记标签
+        sending_flag: false,
+
+        // a标签动态显示信息
+        sms_code_tip: '获取短信验证码',
 
     },
 
@@ -146,6 +155,78 @@ let vm = new Vue({
 
         },
 
+        // 校验短信验证码
+        check_sms_code(){
+            if(this.sms_code.length != 6){
+                this.error_sms_code_mesaage = '请填写短信验证码';
+                this.error_sms_code = true;
+            }else {
+                this.error_sms_code = false;
+            }
+
+        },
+
+        // 点击发送短信验证码
+        send_sms_code(){
+            // sending_flag标记锁：已发送，60s内点击无效（类似上厕所则关门，后面的人看到门关了而不进去，等上完才开门）
+            if( this.sending_flag == true){
+                return;
+            }
+            this.sending_flag = true;           // 关闭标记锁
+
+            // 校验参数
+            this.check_mobile();
+            this.check_image_code();
+            if(this.error_mobile == true || this.error_image_code == true){
+                this.sending_flag = false;
+                return;
+            }
+
+            // axios请求后端发送短信
+            let url = '/sms_codes/' + this.mobile + '/?image_code=' + this.image_code + '&uuid=' + this.uuid;
+            axios.get(url, {
+                responseType: 'json',
+            }).then((response) => {
+                if(response.data.code == '0'){
+                    // 展示倒计时60s    setInterval(func, ms, params) ：每隔ms执行func一次
+                    num = 60;
+                    var tid = setInterval(() => {
+                        if(num == 1){
+                            // 倒计时到1  停止回调函数的执行
+                            clearInterval(tid);
+                            // 还原a标签默认提示信息
+                            this.sms_code_tip = '获取短信验证码';
+                            this.generate_image_code();                     // 重新生成图形验证码
+                            this.sending_flag = false;                      // 开锁
+                        }
+                        else {
+                            console.log(1)                                  // 可以看到console一直在每隔一秒就输出一次1
+                            num -= 1;
+                            this.sms_code_tip = num + '秒';
+                            // this.error_sms_code_mesaage = response.data.error_mesaage;        // 无需提示用户发送成功
+                            // this.error_sms_code = true;
+                        }
+                    }, 1000);                                   // 延迟时间timeout是毫秒
+                }
+                else{
+                    if(response.data.code == '4001'){                    // 错误码4001，错误信息error_mesaage有两种：失效或者输入有误
+                        this.error_image_code_message = response.data.error_mesaage;
+                        this.error_image_code = true;
+                    }
+                    else {                                              // 错误码4002 短信验证码发送过于频繁
+                        this.error_sms_code_mesaage = response.data.error_mesaage;
+                        this.error_sms_code = true;
+                    }
+                    this.generate_image_code();                         // 刷新图形验证码
+                    this.sending_flag = false;                          // 打开标记锁
+                }
+
+            }).catch((error) => {
+                console.log(error);
+                this.sending_flag = false;
+            });
+        },
+
         // 校验是否勾选协议
         check_allow(){
             // if(this.allow){               // 勾选与没勾选就是存在不存在
@@ -165,8 +246,9 @@ let vm = new Vue({
             this.check_password2();
             this.check_mobile();
             this.check_allow();
+            this.check_sms_code();
             // 判断只要有一个错误，则拒绝提交
-            if(this.error_name == true || this.error_password == true || this.error_password2 == true || this.error_mobile == true || this.error_allow == true){
+            if(this.error_name == true || this.error_password == true || this.error_password2 == true || this.error_mobile == true || this.error_allow == true || this.error_sms_code == true){
                 window.event.returnValue = false;
             }
         },
