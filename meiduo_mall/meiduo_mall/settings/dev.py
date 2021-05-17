@@ -59,6 +59,8 @@ ALLOWED_HOSTS = ['localhost',
 # 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
 AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用名.模型类名
 
+# 指定自定义认证后端
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
 
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)

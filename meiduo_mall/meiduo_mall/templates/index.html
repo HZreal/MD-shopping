@@ -6,29 +6,32 @@
     <link rel="stylesheet" type="text/css" href="{{ static('css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
     <script type="text/javascript" src="{{ static('js/jquery-1.12.4.min.js') }}"></script>
-{#    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>     #}
-	<script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>
-    <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+{#	<script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>#}
+{#    <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>#}
 </head>
 <body>
 	<div id="app">
-	<div class="header_con">
+	<div class="header_con" v-cloak>
 		<div class="header">
 			<div class="welcome fl">欢迎来到美多商城!</div>
 			<div class="fr">
-				<div class="login_btn fl">
-                    欢迎您：<em>传智播客</em>
+                <div v-if="username" class="login_btn fl">
+                    欢迎您：<em>[[ username ]]</em>
                     <span>|</span>
-                    <a href="#">退出</a>
+                    <a href="{{ url('users:logout') }}">退出</a>
                 </div>
-				<div class="login_btn fl">
-					<a href="login.html">登录</a>
+				<div v-else class="login_btn fl">
+					<a href="{{ url('users:login') }}">登录</a>
 					<span>|</span>
-					<a href="register.html">注册</a>
+					<a href="{{ url('users:register') }}">注册</a>
 				</div>
+
 				<div class="user_link fl">
 					<span>|</span>
-					<a href="user_center_info.html">用户中心</a>
+					<a href="{{ url('users:info') }}">用户中心</a>
 					<span>|</span>
 					<a href="cart.html">我的购物车</a>
 					<span>|</span>

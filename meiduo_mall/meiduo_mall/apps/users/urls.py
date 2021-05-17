@@ -4,8 +4,9 @@ urlpatterns = [
     # name就是给url起别名，这个别名name指向这个路由，哪怕修改了此路由,依然可以通过别名name找到此路由
     # 为你的URL取名能使你在 Django 的任意地方唯一地引用它，尤其是在模板中。这个有用的特性允许你只改一个文件就能全局地修改某个URL模式。
     # reverse(users:register) —> '/register/'
+    # 用户注册
     # re_path(r'^register/$', views.RegisterView.as_view()),
-    path('register/', views.RegisterView.as_view(), name='register'),       # 用户注册
+    path('register/', views.RegisterView.as_view(), name='register'),
 
     # 用户输入用户名鼠标失去焦点的axios请求，判断注册的用户名是否重复
     re_path(r'^usernames/(?P<username>[a-zA-Z][0-9a-zA-Z_]{4,19})/count/$', views.UsernameCountView.as_view()),
@@ -14,6 +15,14 @@ urlpatterns = [
     # 用户输入手机号鼠标失去焦点的axios请求，判断注册的手机号是否重复
     re_path(r'^mobiles/(?P<mobile>1[34578]\d{9})/count/$', views.MobileCountView.as_view()),
 
+    # 用户登录
+    # re_path(r'^login/$', views.LoginView.as_view(), name='login'),
+    path('login/', views.LoginView.as_view(), name='login'),
+
+    # 用户退出登录
+    path('logout/', views.LogoutView.as_view(), name='logout'),
+
+    path('info/', views.UserInfoView.as_view(), name='info'),
 
 ]
 
