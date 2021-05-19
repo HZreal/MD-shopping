@@ -22,6 +22,7 @@ urlpatterns = [
     # 用户退出登录
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
+    # 用户信息
     path('info/', views.UserInfoView.as_view(), name='info'),
 
 ]

@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django import http
 # from models import User           # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
 from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from users.models import User       # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
 from django.views import View
@@ -141,6 +142,11 @@ class LoginView(View):
         else:                                                           # 状态保持周期为两周(默认，可设定)
             request.session.set_expiry(None)
 
+        # 取出查询字符串参数next
+        next = request.GET.get('next')
+        if next:
+            return redirect(next)                      # 若有next,则直接重定向到next对应的路由
+
         # 为了实现首页右上角展示用户名信息，将用户名缓存到cookie中,由前端vue调用cookie信息渲染
         response = redirect(reverse('contents:index'))
         response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
@@ -163,14 +169,18 @@ class LogoutView(View):
         return response
 
 
-
-class UserInfoView(View):
+# 用户中心：需要验证用户登录才可进入，继承父类LoginRequiredMixin，利用next参数重定向
+class UserInfoView(LoginRequiredMixin, View):
     # 提供用户中心页面
     def get(self, request):
+        # if request.user.is_authenticated:
+        #     return render(request, 'user_center_info.html')
+        # else:
+        #     return  redirect(reverse('users:login'))
+
+        # login_url = '/login/'               # 在配置文件dev.py中设置，则每个需要验证的视图函数不用写
+        # redirect_field_name = REDIRECT_FIELD_NAME = 'next'    # 默认next，引导到原来的路由，无需设置
         return render(request, 'user_center_info.html')
-
-
-
 
 
 

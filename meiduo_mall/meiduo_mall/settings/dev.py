@@ -62,6 +62,9 @@ AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用
 # 指定自定义认证后端
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
 
+# 判断用户是否是登录，指定登录后重定向的地址
+LOGIN_URL = '/login/'
+
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
 # print(sys.path)                                                     # PYTHONPATH 是一个列表，python解释器对模块的搜索按列表中的顺序搜索
