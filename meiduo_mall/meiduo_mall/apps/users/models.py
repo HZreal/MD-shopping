@@ -34,8 +34,8 @@ class User(AbstractUser):
     class Meta():
         # 模型类在数据库中生成的表名默认是  应用名.类名(users.user)
         db_table = 'tb_user'                                  # 自定义表名
-        verbose_name = '用户'                                 # 在admin站点显示的名字
-        verbose_name_plural = verbose_name
+        verbose_name = '用户'                                 # verbose_name指定在admin管理界面中显示中文
+        verbose_name_plural = verbose_name                    # verbose_name_plural表示复数形式的显示
 
     def __str__(self):
         return self.username

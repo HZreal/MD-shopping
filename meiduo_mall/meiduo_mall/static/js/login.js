@@ -40,7 +40,7 @@ let vm = new Vue({
 				window.event.returnValue = false
             }
         },
-        // qq登录
+        // qq登录按钮点击事件
         qq_login(){
             let next = get_query_string('next') || '/';
             let url = '/qq/login/?next=' + next;

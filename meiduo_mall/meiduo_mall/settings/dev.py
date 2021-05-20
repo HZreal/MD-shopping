@@ -53,6 +53,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1',
                  '192.168.0.103',
+                 'www.meiduo.site',
                  ]
 
 
@@ -64,6 +65,16 @@ AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
 
 # 判断用户是否是登录，指定登录后重定向的地址
 LOGIN_URL = '/login/'
+
+# QQ登录的配置参数
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
+# QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback/'
+
+
+
+
 
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
@@ -81,7 +92,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))                    # 运行�
 # 标记为源根：是告诉IDE编译器(pycharm)此文件夹及其子文件夹包含应作为构建过程的一部分进行编译的源代码，也即是pycharm编辑器能找到该模块，但运行代码是解释器进行的，解释器不一定找得到该模块，解释器找模块是通过模块搜索路径顺序查找的
 
 
-# 安装注册子应用
+# 安装注册子应用，子应用是否注册取决于其是否需要迁移或者需要模板渲染
 INSTALLED_APPS = [
     'django.contrib.admin',                             # admin子应用，Django后台管理系统
     'django.contrib.auth',                              # auth子应用，Django默认的用户认证系统
@@ -95,6 +106,8 @@ INSTALLED_APPS = [
     # 'users.apps.UsersConfig',
     'contents',                                         # 首页广告模块
     'verifications',                                    # 图形验证码
+    'oauth'
+
 ]
 
 
