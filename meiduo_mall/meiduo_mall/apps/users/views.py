@@ -197,7 +197,7 @@ class UserInfoView(LoginRequiredMixin, View):
 
 
 # 接收axios请求，添加邮箱
-# 后端检测到用户未登录时，会跳到LoginRequiredJSONMixin中执行重写函数handle_no_permission()，根据需求这里返回json数据：错误码4101
+# 后端检测到用户未登录时，不会跳入此视图函数，而是会先跳到LoginRequiredJSONMixin中执行重写函数handle_no_permission()，根据需求这里返回json数据：错误码4101
 class EmailView(LoginRequiredJSONMixin, View):
 
     # put请求：数据库更新字段数据
@@ -223,7 +223,7 @@ class EmailView(LoginRequiredJSONMixin, View):
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
-        # 成功添加邮箱后的响应
+        # 成功添加邮箱后响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加成功'})
 
 
