@@ -2,6 +2,7 @@ let vm = new Vue({
     el: '#app',
     delimiters: ['[[', ']]'],
     data: {
+        // 读取js变量保存的后端传过来的jinja2模板数据
         username: username,
         mobile: mobile,
         email: email,
@@ -61,7 +62,7 @@ let vm = new Vue({
                         } else if (response.data.code == '4101') {
                             location.href = '/login/?next=/info/';
                         } else {
-                            alert(response.data.errmsg);
+                            console.log(response.data.errmsg);
                         }
                     })
                     .catch(error => {

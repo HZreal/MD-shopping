@@ -29,6 +29,9 @@ from django.db import models
 class User(AbstractUser):
     # 用户名和手机号都是唯一不可重复的
     mobile = models.CharField(max_length=11, unique=True, verbose_name='手机号')
+    # 追加字段，需要给个默认值
+    email_active = models.BooleanField(default=False, verbose_name='邮箱验证状态')
+
 
     # 内嵌类：定义元数据(不是字段的数据) -- 比如数据库表名，排序选项, admin选项，起别名等等
     class Meta():

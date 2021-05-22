@@ -7,11 +7,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from users.models import User       # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
 from django.views import View
-import re
+import re, json, logging
 from django.db import DatabaseError
 from meiduo_mall.utils.response_code import RETCODE             # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
 from django_redis import get_redis_connection
+from meiduo_mall.utils.views import LoginRequiredJSONMixin
 
+logger = logging.getLogger('django')
 
 # 注册
 class RegisterView(View):
@@ -177,17 +179,52 @@ class UserInfoView(LoginRequiredMixin, View):
         #     return render(request, 'user_center_info.html')
         # else:
         #     return  redirect(reverse('users:login'))
+        # 以上验证登录逻辑因继承LoginRequiredMixin类自动验证
 
+        # LoginRequiredMixin类有两个配置参数(详看源码)
         # login_url = '/login/'               # 在配置文件dev.py中设置，则每个需要验证的视图函数不用写
         # redirect_field_name = REDIRECT_FIELD_NAME = 'next'    # 默认next，引导到原来的路由，无需设置
-        return render(request, 'user_center_info.html')
+
+        # LoginRequiredMixin验证用户已登录，那么request.user就是登录用户，即无需查库获取用户对象
+        # 将用户信息通过模板显示在页面
+        context = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active,
+        }
+        return render(request, 'user_center_info.html', context)
 
 
+# 接收axios请求，添加邮箱
+# 后端检测到用户未登录时，会跳到LoginRequiredJSONMixin中执行重写函数handle_no_permission()，根据需求这里返回json数据：错误码4101
+class EmailView(LoginRequiredJSONMixin, View):
 
+    # put请求：数据库更新字段数据
+    def put(self, request):
+        # 接收参数：对于非表单类型的请求体数据，Django无法自动解析,通过request.body属性获取最原始的请求体数据，自行根据请求体格式（JSON、XML等）进行解析，request.body返回bytes类型
+        body = request.body             # 前端json数据保存在请求体body
+        json_str = body.decode()
+        data_dict = json.loads(json_str)
+        email = data_dict.get('email')
 
+        # 校验参数
+        if not email:
+            return http.HttpResponseForbidden('缺少必要参数')
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('输入参数email有误')
 
+        # 将用户输入的邮箱保存到数据库用户表的email字段
+        try:
+            request.user.email = email                       # 更新字段
+            request.user.save()                              # 入库
+            # User.objects.filter(username__exact=request.user.username).update(email=email)
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
-
+        # 成功添加邮箱后的响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加成功'})
 
 
 

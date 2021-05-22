@@ -28,9 +28,9 @@ def check_access_token(access_token_openid):
 
     try:
         data = s.loads(access_token_openid)
-    except BadData:         # 密文过期
+    except BadData:                                 # 密文过期
         return None
-    else:                   # 未过期，返回明文
+    else:                                           # 未过期，返回明文
         return data.get('openid')
 
 

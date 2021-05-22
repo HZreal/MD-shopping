@@ -25,6 +25,9 @@ urlpatterns = [
     # 用户信息
     path('info/', views.UserInfoView.as_view(), name='info'),
 
+    # 接收axios请求，添加邮箱：数据库用户更新字段
+    path('emails/', views.EmailView.as_view()),
+
 ]
 
 
