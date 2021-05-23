@@ -1,18 +1,23 @@
-from django.contrib.auth import login, logout,authenticate
+from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from django import http
-# from models import User           # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
+# from models import User                         # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from users.models import User       # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
+from users.models import User                     # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
 from django.views import View
 import re, json, logging
 from django.db import DatabaseError
-from meiduo_mall.utils.response_code import RETCODE             # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
+from meiduo_mall.utils.response_code import RETCODE                      # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
 from django_redis import get_redis_connection
 from meiduo_mall.utils.views import LoginRequiredJSONMixin
+from celery_tasks.email.tasks import send_verify_email
+from users.utils import generate_email_url, check_verify_email_token
 
+
+
+# 创建日志器
 logger = logging.getLogger('django')
 
 # 注册
@@ -186,18 +191,21 @@ class UserInfoView(LoginRequiredMixin, View):
         # redirect_field_name = REDIRECT_FIELD_NAME = 'next'    # 默认next，引导到原来的路由，无需设置
 
         # LoginRequiredMixin验证用户已登录，那么request.user就是登录用户，即无需查库获取用户对象
-        # 将用户信息通过模板显示在页面
+        # print(request.user)            # 用户对象
+        # 将用户信息通过模板显示在页面：每次页面一刷新都会传一次
         context = {
             'username': request.user.username,
             'mobile': request.user.mobile,
             'email': request.user.email,
             'email_active': request.user.email_active,
         }
+        print(context)
         return render(request, 'user_center_info.html', context)
 
 
 # 接收axios请求，添加邮箱
-# 后端检测到用户未登录时，不会跳入此视图函数，而是会先跳到LoginRequiredJSONMixin中执行重写函数handle_no_permission()，根据需求这里返回json数据：错误码4101
+# 后端检测到用户未登录时，不会跳入此视图函数，而是会先跳到LoginRequiredJSONMixin中执行重写函数handle_no_permission()
+# 若用户处于未登录状态(比如手动删除cookie)，则根据需求返回json数据(错误码4101)，此时不会进入此视图函数
 class EmailView(LoginRequiredJSONMixin, View):
 
     # put请求：数据库更新字段数据
@@ -223,15 +231,39 @@ class EmailView(LoginRequiredJSONMixin, View):
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
+        # 生成邮件验证地址
+        verify_email_url = generate_email_url(request.user)
+
+        # 让celery发送验证邮件
+        send_verify_email.delay(email, verify_email_url)
+
         # 成功添加邮箱后响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加成功'})
 
 
+# 接收用户邮件验证
+class VerifyEmailView(View):
+    def get(self, request):
+        # 接收参数
+        token = request.GET.get('token')
+        # 校验参数
+        if not token:
+            return http.HttpResponseForbidden('缺少必要参数token')
 
+        # 通过token解码并查库返回的用户对象
+        user = check_verify_email_token(token)
+        if not user:
+            return http.HttpResponseForbidden('无效的token')
+        # 将用户的email_active设置为True
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseServerError('激活邮箱失败')
 
-
-
-
+        # 响应：重定向到用户中心
+        return redirect(reverse('users:info'))
 
 
 

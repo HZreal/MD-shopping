@@ -71,7 +71,7 @@ class SMSCodeView(View):
         # 发送短信验证码(单例)
         # CCP().send_message(tid=constants.SEND_SMS_TEMPLATE_ID, mobile='15926750521', datas=(sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60))      # 300/60 = 5.0 而 300//60 = 5
         # 交给celery消息队列完成发送短信验证码：参数交给delay，再传给被装饰了的任务函数send_sms_code
-        # send_sms_code.delay(mobile='15926750521', sms_code=sms_code)
+        send_sms_code.delay(mobile='15926750521', sms_code=sms_code)
 
         # 返回响应
         return http.JsonResponse({'code': RETCODE.OK, 'error_mesaage': '发送短信验证码成功'})

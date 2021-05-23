@@ -1,8 +1,10 @@
-# 自定义用户认证后端：实现多账号登录
 import re
-
 from django.contrib.auth.backends import ModelBackend
 from users.models import User
+
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadData
+from django.conf import settings
+from users import constants
 
 # 通过账号获取用户(封装过程)
 def get_user_by_account(account):
@@ -17,10 +19,8 @@ def get_user_by_account(account):
     else:
         return user
 
-# 自定义用户认证后端，继承自系统默认后端
+# 自定义用户认证后端，继承自系统默认后端，实现多账号登录
 class UsernameMobileBackend(ModelBackend):
-
-    # Authenticates against settings.AUTH_USER_MODEL.
     # 默认是 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
     # 需要在配置信息中设置自定义用户认证后端
 
@@ -37,21 +37,44 @@ class UsernameMobileBackend(ModelBackend):
             return None
 
 
+# 生成邮件验证地址
+def generate_email_url(user):
+
+    s = Serializer(settings.SECRET_KEY, constants.VERIFY_EMAIL_TOKEN_EXPIRES)
+
+    data = {
+        'user_id': user.id,
+        'email': user.email,
+    }
+
+    # 序列化：调用dumps方法进行序列化，返回类型是byte
+    token = s.dumps(data).decode()
+
+    # 拼接邮件验证地址
+    verify_email_url = settings.EMAIL_VERIFY_URL + '?token=' + token
+
+    return verify_email_url
 
 
+def check_verify_email_token(token):
+    # 反序列化token
+    s = Serializer(settings.SECRET_KEY, constants.VERIFY_EMAIL_TOKEN_EXPIRES)
 
-
-
-
-
-
-
-
-
-
-
-
-
+    try:
+        data = s.loads(token)
+    except BadData:                             # 密文过期
+        return None
+    else:                                       # 未过期
+        # 取数据
+        user_id = data.get('user_id')
+        email = data.get('email')
+        # 查库看是否存在这样的用户
+        try:
+            user = User.objects.get(id=user_id, email=email)
+        except User.DoesNotExist:
+            return None
+        else:
+            return user
 
 
 

@@ -28,6 +28,12 @@ urlpatterns = [
     # 接收axios请求，添加邮箱：数据库用户更新字段
     path('emails/', views.EmailView.as_view()),
 
+    # 接收用户邮件验证
+    path('emails/verification/', views.VerifyEmailView.as_view()),
+
+
+
+
 ]
 
 
