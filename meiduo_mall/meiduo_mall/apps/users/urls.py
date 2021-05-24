@@ -1,3 +1,4 @@
+# users.urls
 from django.urls import path,re_path
 from . import views
 urlpatterns = [
@@ -22,7 +23,7 @@ urlpatterns = [
     # 用户退出登录
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
-    # 用户信息
+    # 显示用户信息页面
     path('info/', views.UserInfoView.as_view(), name='info'),
 
     # 接收axios请求，添加邮箱：数据库用户更新字段
@@ -31,7 +32,8 @@ urlpatterns = [
     # 接收用户邮件验证
     path('emails/verification/', views.VerifyEmailView.as_view()),
 
-
+    # 显示用户收货地址页面
+    path('addresses/', views.AddressView.as_view(), name='address'),
 
 
 ]

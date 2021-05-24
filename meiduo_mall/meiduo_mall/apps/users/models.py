@@ -208,9 +208,3 @@ class User(AbstractUser):
 
 
 
-
-
-
-
-
-

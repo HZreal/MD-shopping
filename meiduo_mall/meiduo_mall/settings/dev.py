@@ -116,7 +116,8 @@ INSTALLED_APPS = [
     # 'users.apps.UsersConfig',
     'contents',                                         # 首页广告模块
     'verifications',                                    # 图形验证码
-    'oauth'
+    'oauth',                                            # oauth2.0认证
+    'areas',                                            # 省市区
 
 ]
 

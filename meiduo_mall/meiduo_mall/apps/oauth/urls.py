@@ -1,3 +1,4 @@
+# oauth.urls
 from django.urls import path,re_path
 from oauth import views
 

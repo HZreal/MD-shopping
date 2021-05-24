@@ -231,13 +231,13 @@ class EmailView(LoginRequiredJSONMixin, View):
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
-        # 生成邮件验证地址
+        # 生成邮件验证地址(itdangerous序列化)
         verify_email_url = generate_email_url(request.user)
 
-        # 让celery发送验证邮件
+        # 让celery异步发送验证邮件
         send_verify_email.delay(email, verify_email_url)
 
-        # 成功添加邮箱后响应
+        # 成功添加邮箱入库后响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加成功'})
 
 
@@ -250,11 +250,11 @@ class VerifyEmailView(View):
         if not token:
             return http.HttpResponseForbidden('缺少必要参数token')
 
-        # 通过token解码并查库返回的用户对象
+        # 通过token反序列化解码并查库返回的用户对象
         user = check_verify_email_token(token)
         if not user:
             return http.HttpResponseForbidden('无效的token')
-        # 将用户的email_active设置为True
+        # 将用户的email_active字段设置为True，表示用户邮箱已激活
         try:
             user.email_active = True
             user.save()
@@ -266,8 +266,10 @@ class VerifyEmailView(View):
         return redirect(reverse('users:info'))
 
 
-
-
+# 展示收货地址页面
+class AddressView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'user_center_site.html')
 
 
 
