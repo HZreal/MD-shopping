@@ -33,7 +33,7 @@ let vm = new Vue({
 		},
 		// 检查手机号
 		check_mobile(){
-			let re = /^1[3-9]\d{9}$/;
+			let re = /^1[34578]\d{9}$/;
 			if(re.test(this.mobile)) {
 				this.error_mobile = false;
 			} else {

@@ -21,8 +21,10 @@ let vm = new Vue({
         cities: [],                             // 某省下的所有市
         districts: [],                          // 某市下的所有区县
 
-        addresses: JSON.parse(JSON.stringify(addresses)),
-        default_address_id: default_address_id,
+        // 后端通过jinja2传给js再传给vue的用户地址信息
+        addresses: JSON.parse(JSON.stringify(addresses)),              // 将jinja2传来的字典列表转成列表/数组格式的字符串，再用Json.parse解析成js可识别的数组或对象数据
+        default_address_id: default_address_id,                        // 默认地址id
+
         editing_address_index: '',
         edit_title_index: '',
         new_title: '',
@@ -129,7 +131,7 @@ let vm = new Vue({
         },
         // 校验手机号
         check_mobile(){
-            let re = /^1[3-9]\d{9}$/;
+            let re = /^1[34578]\d{9}$/;
             if(re.test(this.form_address.mobile)) {
                 this.error_mobile = false;
             } else {

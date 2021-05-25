@@ -1,19 +1,20 @@
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from django import http
-# from models import User                         # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from users.models import User                     # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
+# from models import User                                  # 导入模块时找不到，users不在导包路径，系统找不到users.model.py
+from users.models import User, Address                     # 运行时不报错，程序运行时已进行apps/插入导包操作，但未运行时此处会报红色编辑错误(编辑器pycharm找不到)，只需设置apps标记为源根，就不会报编辑错误
+from users.utils import generate_email_url, check_verify_email_token
+from users import constants
 from django.views import View
 import re, json, logging
 from django.db import DatabaseError
 from meiduo_mall.utils.response_code import RETCODE                      # 将工程根meiduo_mall标记为源根，则编辑器不会报红，不论编辑器是否报红，解释器能找到模块就行
-from django_redis import get_redis_connection
 from meiduo_mall.utils.views import LoginRequiredJSONMixin
+from django_redis import get_redis_connection
 from celery_tasks.email.tasks import send_verify_email
-from users.utils import generate_email_url, check_verify_email_token
+
 
 
 
@@ -266,15 +267,114 @@ class VerifyEmailView(View):
         return redirect(reverse('users:info'))
 
 
-# 展示收货地址页面
+# 展示收货地址页面，同时通过查询显示当前登录用户收货地址信息
 class AddressView(LoginRequiredMixin, View):
     def get(self, request):
-        return render(request, 'user_center_site.html')
+        # 显示的用户地址，查询条件为：属于当前登录用户且逻辑删除为False
+        addresses = Address.objects.filter(user=request.user, is_deleted=False)
+
+        # !!! Django模板与jinja2都能解析模型类列表，但是json和vue.js无法识别，需要解析(将模型类列表转成字典列表)
+        # 这里用jinja2模板传数据到前端，然后由vue进行渲染，故也需要数据转换
+        # 列表推导式将用户地址对象列表转成字典列表
+        address_list = [{'id': address.id,
+                         'title': address.title,
+                         'receiver': address.receiver,
+                         'province': address.province.name,
+                         'city': address.city.name,
+                         'district': address.district.name,
+                         'place': address.place,
+                         'mobile': address.mobile,
+                         'tel': address.tel,
+                         'email': address.email,
+                         } for address in addresses]
+        # a = request.user.default_address             # 默认地址对象
+        # c = request.user.default_address.id          # 用户对象外键返回默认地址对象，默认地址对象的id = 1
+        # b = request.user.default_address_id          # 用户对象的default_address_id字段 = 默认地址id = 1
+        # 构造传给页面模板的数据
+        context = {
+            'default_address_id': request.user.default_address_id,                 # 默认地址的id：前端获取并显示是否是默认地址
+            'addresses': address_list,
+        }
+        # 响应页面
+        return render(request, 'user_center_site.html', context)
 
 
+# 接收用户新增地址的axios请求
+class AddressCreateView(LoginRequiredJSONMixin, View):
+    def post(self, request):
+        # 首先判断用户地址数量是否超过上限(超过上限直接错误返回，参数都无需接收校验)：查询当前登录用户的地址数量
+        # count = Address.objects.filter(user__exact=request.user).count()
+        # count = Address.objects.filter(user_id__exact=request.user.id).count()
+        count = request.user.addresses.count()  # 一查多
+        if count > constants.USER_ADDRESS_COUNTS_LIMIT:                      # 20
+            return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '超出用户地址数量上限'})
+
+        # 接收参数
+        json_str = request.body.decode()
+        data_dict = json.loads(json_str)
+        receiver = data_dict.get('receiver')
+        province_id = data_dict.get('province_id')
+        city_id = data_dict.get('city_id')
+        district_id = data_dict.get('district_id')
+        place = data_dict.get('place')
+        mobile = data_dict.get('mobile')
+        tel = data_dict.get('tel')
+        email = data_dict.get('email')
+        # 校验参数
+        if not all([receiver, province_id, city_id, district_id, place,mobile]):
+            return http.HttpResponseForbidden('缺少必要参数')
+        if not re.match(r'^1[34578]\d{9}$', mobile):
+            return http.HttpResponseForbidden('参数mobile有误')
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return http.HttpResponseForbidden('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return http.HttpResponseForbidden('参数email有误')
 
 
+        # 保存用户传入的地址信息到mysql
+        try:
+            # 初始化类关键字参数外键名还是外键名
+            # address = Address(user=request.user, receiver=receiver, province=province_id, city=city_id, district=district_id, place=place, mobile=mobile)
+            # address.save()
+            address = Address.objects.create(                       # 调用了objects管理器，关键字参数外键字段名默认后加_id，create()封装了save()操作
+                    # user = request.user,                          # ???与下一行等价，为啥可以这么写
+                    user_id = request.user.id,
+                    title = receiver,
+                    receiver = receiver,
+                    # province = province_id,                       # 会报错  "Address.province" must be a "Area" instance.
+                    province_id = province_id,                      # 外键字段名默认后加_id
+                    city_id = city_id,
+                    district_id = district_id,
+                    place=place,
+                    mobile=mobile,
+                    tel = tel,
+                    email = email,
+                )
 
+            # 如果用户没有默认地址则将当前地址设置为默认地址
+            if not request.user.default_address:
+                request.user.default_address = address                # 将新增地址对象赋给User对象的default_address字段，数据库该字段自动存储的是新增地址对象的id
+                request.user.save()
+        except DatabaseError as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '新增地址失败'})
+
+        # 构造新增地址的字典数据传给前端
+        address_dict = {'id': address.id,
+                        'title': address.title,
+                        'receiver': address.receiver,
+                        'province': address.province.name,
+                        'city': address.city.name,
+                        'district': address.district.name,
+                        'place': address.place,
+                        'mobile': address.mobile,
+                        'tel': address.tel,
+                        'email': address.email,
+                        }
+        # 响应新增地址的结果：需要将新增地址信息的json数据返回给前端渲染
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增地址成功', 'address': address_dict})
 
 
 

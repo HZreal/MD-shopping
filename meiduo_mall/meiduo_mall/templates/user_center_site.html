@@ -65,46 +65,28 @@
 		<div class="right_content clearfix" v-cloak>
 			<div class="site_top_con">
 				<a @click="show_add_site">新增收货地址</a>
-				<span>你已创建了<b>2</b>个收货地址，最多可创建<b>20</b>个</span>
+				<span>你已创建了<b>[[ addresses.length ]]</b>个收货地址，最多可创建<b>20</b>个</span>
 			</div>
-			<div class="site_con">
+			<div class="site_con" v-for="(address, index) in addresses">
 				<div class="site_title">
-					<h3>传智播客 北京</h3>
+					<h3>[[ address.title ]]</h3>
 					<a href="javascript:;" class="edit_icon"></a>
-					<em>默认地址</em>						
+					<em v-if="address.id==default_address_id">默认地址</em>
 					<span class="del_site">×</span>
 				</div>
 				<ul class="site_list">
-					<li><span>收货人：</span><b>传智播客</b></li>
-					<li><span>所在地区：</span><b>北京市昌平区</b></li>
-					<li><span>地址：</span><b>建材城西路</b></li>
-					<li><span>手机：</span><b>188****0001</b></li>
-					<li><span>固定电话：</span><b>78912345</b></li>
-					<li><span>电子邮箱：</span><b>hmmeiduo@163.com</b></li>
+					<li><span>收货人：</span><b>[[ address.receiver ]]</b></li>
+					<li><span>所在地区：</span><b>[[ address.provinces ]] [[ address.city ]] [[ address.district ]]</b></li>
+					<li><span>地址：</span><b>[[ address.place ]]</b></li>
+					<li><span>手机：</span><b>[[ address.mobile ]]</b></li>
+					<li><span>固定电话：</span><b>[[ address.tel ]]</b></li>
+					<li><span>电子邮箱：</span><b>[[ address.email ]]</b></li>
 				</ul>
 				<div class="down_btn">
+                    <a v-if="address.id!=default_address_id" class="set_default">设为默认</a>
 					<a href="javascript:;" class="edit_icon">编辑</a>
 				</div>
 			</div>
-			<div class="site_con">
-				<div class="site_title">
-					<h3>传智播客 北京</h3>
-					<a href="javascript:;" class="edit_icon"></a>
-					<span class="del_site">×</span>
-				</div>
-				<ul class="site_list">
-					<li><span>收货人：</span><b>传智播客</b></li>
-					<li><span>所在地区：</span><b>北京市昌平区</b></li>
-					<li><span>地址：</span><b>建材城西路</b></li>
-					<li><span>手机：</span><b>188****0001</b></li>
-					<li><span>固定电话：</span><b>78912345</b></li>
-					<li><span>电子邮箱：</span><b>hmmeiduo@163.com</b></li>
-				</ul>
-				<div class="down_btn">
-					<a href="javascript:;" class="set_default">设为默认</a>
-					<a href="javascript:;" class="edit_icon">编辑</a>
-				</div>
-			</div>			
 		</div>
 	</div>
 	<div class="footer">
@@ -165,7 +147,7 @@
                     <input v-model="form_address.email" @blur="check_email" type="text" class="email">
                     <span v-show="error_email" class="email_error">邮箱信息有误</span>
                 </div>
-                <input type="button" name="" value="新 增" class="info_submit">
+                <input @click="save_address" type="button" name="" value="新 增" class="info_submit">
                 <input @click="is_show_edit=false" type="reset" name="" value="取 消" class="info_submit info_reset">
             </form>
 		</div>
@@ -173,8 +155,8 @@
 	</div>
 	</div>
 	<script type="text/javascript">
-		let addresses = "";
-		let default_address_id = "";
+		let addresses = {{ addresses | safe }};
+		let default_address_id = "{{ default_address_id }}";
     </script>
 	<script type="text/javascript" src="{{ static('js/common.js') }}"></script>
 	<script type="text/javascript" src="{{ static('js/user_center_site.js') }}"></script>

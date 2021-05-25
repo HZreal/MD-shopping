@@ -32,8 +32,11 @@ urlpatterns = [
     # 接收用户邮件验证
     path('emails/verification/', views.VerifyEmailView.as_view()),
 
-    # 显示用户收货地址页面
+    # 显示用户收货地址页面，同时通过查询显示当前登录用户收货地址信息
     path('addresses/', views.AddressView.as_view(), name='address'),
+
+    # 接收用户新增地址的axios请求
+    path('addresses/create/', views.AddressCreateView.as_view())
 
 
 ]

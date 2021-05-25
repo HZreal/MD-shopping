@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 
-# 省市区模型类
+# 省市区模型类(自关联表)
 class Area(models.Model):
     name = models.CharField(max_length=20, verbose_name='名称')
     # self表示此表为自关联
