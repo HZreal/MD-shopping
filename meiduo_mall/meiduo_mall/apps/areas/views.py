@@ -44,15 +44,18 @@ class AreasView(View):
                 # 没有缓存数据则查库获取市或区县数据
                 try:
                     # 需求的json数据：sub_data = {"id":130000, "name":"河北省", "subs":[{"id":130100, "name":"石家庄市"}, {}, {}, {"id":130104, "name":"桥西区"}]}
-                    model= Area.objects.get(id=area_id)
-                    sub_model_list = model.sub.all()               # 子地区对象列表
+                    area = Area.objects.get(id=area_id)
+                    sub_area_list = area.sub.all()                                              # 子地区对象列表
+                    # sub_area_list = Area.objects.filter(parent_id=area_id)                    # 亦可
+
+                    # 将模型类列表转成字典列表
                     # subs = []
-                    # for sub_model in sub_model_list:
-                    #     district = {'id': sub_model.id, 'name': sub_model.name}
-                    #     subs.append(district)
-                    # sub_data = {'id': model.id, 'name': model.name, 'subs': subs}
+                    # for sub_area in sub_area_list:
+                    #     sub_area_dict = {'id': sub_area.id, 'name': sub_area.name}
+                    #     subs.append(sub_area_dict)
+                    # sub_data = {'id': area.id, 'name': area.name, 'subs': subs}
                     # 使用列表推导式更简洁
-                    sub_data = {'id': model.id, 'name': model.name, 'subs': [{'id': sub_model.id, 'name': sub_model.name} for sub_model in sub_model_list]}
+                    sub_data = {'id': area.id, 'name': area.name, 'subs': [{'id': sub_area.id, 'name': sub_area.name} for sub_area in sub_area_list]}
 
                     # 缓存数据到cache
                     cache.set('sub_area_' + area_id, sub_data, 3600)

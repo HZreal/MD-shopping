@@ -23,7 +23,7 @@ let vm = new Vue({
 
         // 后端通过jinja2传给js再传给vue的用户地址信息
         addresses: JSON.parse(JSON.stringify(addresses)),              // 将jinja2传来的字典列表转成列表/数组格式的字符串，再用Json.parse解析成js可识别的数组或对象数据
-        default_address_id: default_address_id,                        // 默认地址id
+        default_address_id: parseInt(JSON.parse(JSON.stringify(default_address_id))),                        // 将后端传来的默认地址id转成int
 
         // 字符串类型的下标索引：当前需要编辑的address对象在addresses数组中的下标index(整型)转成字符串类型
         editing_address_index: '',                                     // editing_address_index = index.toString()

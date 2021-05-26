@@ -472,7 +472,7 @@ class SetDefaultAddressView(LoginRequiredJSONMixin, View):
 # 修改收货地址标题
 class UpdateAddressTitleView(LoginRequiredJSONMixin, View):
     def put(self, request, address_id):
-        # 接收参数
+        # 接收参数：用户输入的title内容通过请求体body传来
         json_str = request.body.decode()
         data_dict = json.loads(json_str)
         title = data_dict.get('title')

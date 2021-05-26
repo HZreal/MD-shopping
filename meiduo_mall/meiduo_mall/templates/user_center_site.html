@@ -78,7 +78,7 @@
                         <h3>[[ address.title ]]</h3>
                         <a @click="show_edit_title(index)" class="edit_title"></a>
 					</div>
-                    <em v-if="address.id==default_address_id">默认地址</em>
+                    <em v-if="address.id===default_address_id">默认地址</em>
 					<span @click="delete_address(index)" class="del_site">×</span>
 				</div>
 				<ul class="site_list">
@@ -154,7 +154,8 @@
                     <input v-model="form_address.email" @blur="check_email" type="text" class="email">
                     <span v-show="error_email" class="email_error">邮箱信息有误</span>
                 </div>
-                <input @click="save_address" type="button" name="" value="新 增" class="info_submit">
+                <input @click="save_address" v-if="editing_address_index" type="button" name="" value="修 改" class="info_submit">
+                <input @click="save_address" v-else type="button" name="" value="新 增" class="info_submit">
                 <input @click="is_show_edit=false" type="reset" name="" value="取 消" class="info_submit info_reset">
             </form>
 		</div>
@@ -163,6 +164,7 @@
 	</div>
 	<script type="text/javascript">
 		let addresses = {{ addresses | safe }};
+		{#  Mark the value as safe which means that in an environment with automatic escaping enabled this variable will not be escaped. #}
 		let default_address_id = "{{ default_address_id }}";
     </script>
 	<script type="text/javascript" src="{{ static('js/common.js') }}"></script>
