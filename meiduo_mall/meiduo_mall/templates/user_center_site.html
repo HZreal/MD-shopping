@@ -69,10 +69,17 @@
 			</div>
 			<div class="site_con" v-for="(address, index) in addresses">
 				<div class="site_title">
-					<h3>[[ address.title ]]</h3>
-					<a href="javascript:;" class="edit_icon"></a>
-					<em v-if="address.id==default_address_id">默认地址</em>
-					<span class="del_site">×</span>
+                    <div v-if="edit_title_index===index">
+                        <input v-model="new_title" type="text" name="">
+                        <input @click="save_title(index)" type="button" name="" value="保存">
+                        <input @click="cancel_title" type="button" name="" value="取消">
+                    </div>
+                    <div>
+                        <h3>[[ address.title ]]</h3>
+                        <a @click="show_edit_title(index)" class="edit_title"></a>
+					</div>
+                    <em v-if="address.id==default_address_id">默认地址</em>
+					<span @click="delete_address(index)" class="del_site">×</span>
 				</div>
 				<ul class="site_list">
 					<li><span>收货人：</span><b>[[ address.receiver ]]</b></li>
@@ -83,8 +90,8 @@
 					<li><span>电子邮箱：</span><b>[[ address.email ]]</b></li>
 				</ul>
 				<div class="down_btn">
-                    <a v-if="address.id!=default_address_id" class="set_default">设为默认</a>
-					<a href="javascript:;" class="edit_icon">编辑</a>
+                    <a v-if="address.id!=default_address_id" @click="set_default(index)" class="set_default">设为默认</a>
+					<a href="javascript:;" @click="show_edit_site(index)" class="edit_icon">编辑</a>
 				</div>
 			</div>
 		</div>

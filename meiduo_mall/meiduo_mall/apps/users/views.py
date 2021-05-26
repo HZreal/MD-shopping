@@ -332,7 +332,6 @@ class AddressCreateView(LoginRequiredJSONMixin, View):
             if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
                 return http.HttpResponseForbidden('参数email有误')
 
-
         # 保存用户传入的地址信息到mysql
         try:
             # 初始化类关键字参数外键名还是外键名
@@ -377,30 +376,118 @@ class AddressCreateView(LoginRequiredJSONMixin, View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增地址成功', 'address': address_dict})
 
 
+# 更新和删除用户地址信息
+class UpdateDestroyAddressView(LoginRequiredJSONMixin, View):
+    # 修改地址信息
+    def put(self, request, address_id):
+        # 接收参数
+        json_str = request.body.decode()
+        data_dict = json.loads(json_str)
+        receiver = data_dict.get('receiver')
+        province_id = data_dict.get('province_id')
+        city_id = data_dict.get('city_id')
+        district_id = data_dict.get('district_id')
+        place = data_dict.get('place')
+        mobile = data_dict.get('mobile')
+        tel = data_dict.get('tel')
+        email = data_dict.get('email')
+        # 校验参数
+        if not all([receiver, province_id, city_id, district_id, place, mobile]):
+            return http.HttpResponseForbidden('缺少必要参数')
+        if not re.match(r'^1[34578]\d{9}$', mobile):
+            return http.HttpResponseForbidden('参数mobile有误')
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return http.HttpResponseForbidden('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return http.HttpResponseForbidden('参数email有误')
+
+        # 使用最新的地址信息覆盖指定的旧的地址信息
+        try:
+            Address.objects.filter(id=address_id).update(           # update()返回的是修改的记录条数
+                user_id=request.user.id,
+                title=receiver,
+                receiver=receiver,
+                province_id=province_id,
+                city_id=city_id,
+                district_id=district_id,
+                place=place,
+                mobile=mobile,
+                tel=tel,
+                email=email,
+            )
+            address = Address.objects.get(id=address_id)
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '修改地址失败'})
+
+        # 构造新增地址的字典数据传给前端
+        address_dict = {'id': address.id,
+                        'title': address.title,
+                        'receiver': address.receiver,
+                        'province': address.province.name,
+                        'city': address.city.name,
+                        'district': address.district.name,
+                        'place': address.place,
+                        'mobile': address.mobile,
+                        'tel': address.tel,
+                        'email': address.email,
+                        }
+        # 响应新增地址的结果：需要将新增地址信息的json数据返回给前端渲染
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改地址成功', 'address': address_dict})
 
 
+    # 删除地址信息
+    def delete(self, request, address_id):
+        # 实现指定地址的逻辑删除
+        try:
+            address = Address.objects.get(id=address_id)
+            address.is_deleted = True
+            address.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '删除地址失败'})
+
+        # 成功删除后的响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
 
 
+# 设置默认地址
+class SetDefaultAddressView(LoginRequiredJSONMixin, View):
+    def put(self, request, address_id):
+        try:
+            # 用地址id查库返回当前地址对象
+            address = Address.objects.get(id=address_id)
+            # 设置用户的默认地址字段为当前地址对象
+            request.user.default_address = address
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置默认地址失败'})
+        # 成功设置后响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# 修改收货地址标题
+class UpdateAddressTitleView(LoginRequiredJSONMixin, View):
+    def put(self, request, address_id):
+        # 接收参数
+        json_str = request.body.decode()
+        data_dict = json.loads(json_str)
+        title = data_dict.get('title')
+        # 校验参数
+        if not title:
+            return http.HttpResponseForbidden('缺少必要参数')
+        try:
+            address = Address.objects.get(id=address_id)
+            address.title = title
+            address.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置地址标题失败'})
+        # 成功设置后响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置地址标题成功'})
 
 
 

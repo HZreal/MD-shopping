@@ -36,7 +36,18 @@ urlpatterns = [
     path('addresses/', views.AddressView.as_view(), name='address'),
 
     # 接收用户新增地址的axios请求
-    path('addresses/create/', views.AddressCreateView.as_view())
+    path('addresses/create/', views.AddressCreateView.as_view()),
+
+    # 用户修改或者删除收货地址的请求
+    re_path(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view()),
+
+    # 设置默认地址
+    re_path(r'^addresses/(?P<address_id>\d+)/default/$', views.SetDefaultAddressView.as_view()),
+
+    # 修改收货地址标题
+    re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateAddressTitleView.as_view()),
+
+
 
 
 ]

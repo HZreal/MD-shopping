@@ -25,8 +25,10 @@ let vm = new Vue({
         addresses: JSON.parse(JSON.stringify(addresses)),              // 将jinja2传来的字典列表转成列表/数组格式的字符串，再用Json.parse解析成js可识别的数组或对象数据
         default_address_id: default_address_id,                        // 默认地址id
 
-        editing_address_index: '',
-        edit_title_index: '',
+        // 字符串类型的下标索引：当前需要编辑的address对象在addresses数组中的下标index(整型)转成字符串类型
+        editing_address_index: '',                                     // editing_address_index = index.toString()
+        edit_title_index: '',                                          // 字符串类型的下标索引，与上作用等同
+        // 接收输入框用户输入的新收货地址标题
         new_title: '',
 
         // 表单是否显示错误信息
@@ -105,14 +107,17 @@ let vm = new Vue({
             this.editing_address_index = '';
         },
 
-        // 展示编辑地址弹框
+        // 展示编辑地址弹框：需要传参：需要传参index，为当前address对象在addresses数组中的下标索引
         show_edit_site(index){
-            this.is_show_edit = true;
-            this.clear_all_errors();
-            this.editing_address_index = index.toString();
-            // 只获取要编辑的数据
-            this.form_address = JSON.parse(JSON.stringify(this.addresses[index]));
+            this.is_show_edit = true;                                    // 编辑框展示
+            this.clear_all_errors();                                     // 清空错误提示信息
+            this.editing_address_index = index.toString();               // 下标索引转字符串
+            // TODO 弹出编辑框时，将当前address对象(js数据)转成json数据，再解析成对象数据，从而显示在表单编辑框中
+            // JSON.parse(JSON.stringify(obj))我们一般用来深拷贝，其过程说白了就是利用JSON.stringify将js对象序列化(JSON字符串)，再使用JSON.parse来反序列化(还原)js对象；
+            // 序列化的作用是存储(对象本身存储的只是一个地址映射，如果断电，对象将不复存在，因此需将对象的内容转换成字符串的形式再保存在磁盘上 )和传输（例如 如果请求的Content-Type是 application/x-www-form-urlencoded，则前端这边需要使用qs.stringify(data)来序列化参数再传给后端，否则后端接受不到； ps: Content-Type 为 application/json;charset=UTF-8或者 multipart/form-data 则可以不需要 ）
+            this.form_address = JSON.parse(JSON.stringify(this.addresses[index]));              // JSON.stringify()方法用于将js数据(对象或数组)转换为JSON字符串，
         },
+
         // 校验收货人
         check_receiver(){
             if (!this.form_address.receiver) {
@@ -192,13 +197,15 @@ let vm = new Vue({
                 })
         },
 
-        // 新增地址
+        // 新增or修改地址：点击表单新增按钮触发
         save_address(){
             if (this.error_receiver || this.error_place || this.error_mobile || this.error_email || !this.form_address.province_id || !this.form_address.city_id || !this.form_address.district_id ) {
                 alert('信息填写有误！');
             }
             else {
-                // 注意：0 == '';返回true; 0 === '';返回false;
+                // 注意：0 == '';返回true，因为值相等;       0 === '';返回false，因为值相等但数据类型不同，不全等;
+                // ！！！修改地址时，会传入当前地址的下标index，而当index=0时，由于在js里 0 == '' 为逻辑true，所以无法区分是新增数据还是修改数据
+                // 为了避免在第0个索引处冲突，我们选择this.editing_address_index === ''的方式进行判断
                 if (this.editing_address_index === '') {
                     // 新增地址
                     let url = '/addresses/create/';
@@ -249,7 +256,7 @@ let vm = new Vue({
             }
         },
 
-        // 删除地址
+        // 删除地址：需要传参index，为当前address在addresses数组中的下标索引
         delete_address(index){
             let url = '/addresses/' + this.addresses[index].id + '/';
             axios.delete(url, {
@@ -321,7 +328,7 @@ let vm = new Vue({
                     responseType: 'json'
                 }).then(response => {
                         if (response.data.code == '0') {
-                            // 更新地址title
+                            // 当响应状态码0表示后端设置成功，直接将用户输入的内容this.new_title传给当前address.title进行页面局部刷新显示
                             this.addresses[index].title = this.new_title;
                             this.cancel_title();
                         }
