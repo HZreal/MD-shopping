@@ -118,6 +118,11 @@ INSTALLED_APPS = [
     'verifications',                                    # 图形验证码
     'oauth',                                            # oauth2.0认证
     'areas',                                            # 省市区
+    'goods',                                            # 商品
+
+
+
+
 
 ]
 
