@@ -143,7 +143,7 @@ class LoginView(View):
             return render(request, 'login.html', {'account_error_msg': '账户或密码错误'})
 
         # 状态保持
-        login(request,user)
+        login(request, user)
         # 使用remembered确定状态保持周期，实现记住登录
         if remembered != 'on':                                          # 用户没有记住登录，则状态保持在浏览器会话结束后就销毁
             request.session.set_expiry(0)                               # 单位是秒
@@ -490,18 +490,52 @@ class UpdateAddressTitleView(LoginRequiredJSONMixin, View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置地址标题成功'})
 
 
+# 修改密码视图
+class ChangePasswordView(LoginRequiredMixin, View):
+    # 显示修改密码界面
+    def get(self, request):
+        return render(request, 'user_center_pass.html')
 
+    # 接收用户修改密码的表单并处理
+    def post(self, request):
+        # 接收参数
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        new_password2 = request.POST.get('new_password2')
 
+        # 校验参数
+        if not all([old_password, new_password, new_password2]):
+            return http.HttpResponseForbidden('缺少必传参数')
+        # 校验原始密码
+        if not re.match(r'^[A-Za-z][A-Za-z0-9]{7,19}$', old_password):
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg':'原始密码错误'})
+        try:
+            # user = User.objects.get(id=request.user.id)
+            # user.check_password(old_password)
+            a = request.user.check_password(old_password)
+        except Exception as e:
+            logger.error(e)
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg':'原始密码错误'})
+        # 校验新密码
+        if not re.match(r'^[A-Za-z][A-Za-z0-9]{7,19}$', new_password):
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg':'密码最少8位，最长20位'})
+        if not new_password == new_password2:
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg':'两次输入的密码不一致'})
 
+        # 将新密码保存入库
+        try:
+            request.user.set_password(new_password)
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg':'修改密码失败'})
 
-
-
-
-
-
-
-
-
+        # 密码被修改则应立即清除状态保持(封装了清除session操作)
+        logout(request)
+        # 返回至登录页面，同时清理cookie信息
+        response = redirect(reverse('users:login'))
+        response.delete_cookie('username')
+        return response
 
 
 

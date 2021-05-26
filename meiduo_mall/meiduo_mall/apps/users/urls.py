@@ -23,7 +23,7 @@ urlpatterns = [
     # 用户退出登录
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
-    # 显示用户信息页面
+    # 显示用户个人信息页面
     path('info/', views.UserInfoView.as_view(), name='info'),
 
     # 接收axios请求，添加邮箱：数据库用户更新字段
@@ -32,7 +32,7 @@ urlpatterns = [
     # 接收用户邮件验证
     path('emails/verification/', views.VerifyEmailView.as_view()),
 
-    # 显示用户收货地址页面，同时通过查询显示当前登录用户收货地址信息
+    # 显示用户收货地址页面，同时通过查询显示当前登录用户的收货地址信息
     path('addresses/', views.AddressView.as_view(), name='address'),
 
     # 接收用户新增地址的axios请求
@@ -47,7 +47,8 @@ urlpatterns = [
     # 修改收货地址标题
     re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateAddressTitleView.as_view()),
 
-
+    # 显示修改密码页面
+    path('password/', views.ChangePasswordView.as_view(), name='password'),
 
 
 ]
