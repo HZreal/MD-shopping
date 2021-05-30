@@ -20,6 +20,8 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # 注意：本模块路径为meiduo_mall/meiduo_mall/settings/dev.py
+import meiduo_mall.utils.fastdfs.fdfs_storage
+
 BASE_DIR = Path(__file__).resolve().parent.parent                      # BASE_DIR指向 meiduo_mall/meiduo_mall/
 # BASE_DIR = Path(__file__).resolve().parent.parent.parent             # BASE_DIR指向 meiduo_mall/
 # print(__file__)
@@ -85,6 +87,11 @@ EMAIL_FROM = '开心购，舒心买<huangzhen_happy@163.com>'                   
 # 邮件验证地址
 EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
 
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
+
+# FastDFS服务器路由
+FDFS_BASE_URL = 'http://192.168.94.131:8888/'
 
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)

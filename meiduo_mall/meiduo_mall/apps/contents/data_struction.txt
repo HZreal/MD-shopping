@@ -36,6 +36,70 @@ a ={
 }
 
 
+广告分类数据结构
+{
+    'index_lbt': [
+        {
+            'id': 1,
+            'category': 1,
+            'title': '美图M8s',
+            'url': 'http://www.itcast.cn',
+            'image': 'group1/M00/00/01/CtM3BVrLmc-AJdVSAAEI5Wm7zaw8639396',
+            'text': '',
+            'sequence': 1,
+            'status': 1
+        },
+        {
+            'id': 2,
+            ...
+        },
+       ...
+    ],
+    'index_kx': [
+        {
+        'id': 5,
+        },
+        {}
+        ...
+    ],
+    'index_ytgg': [
+        {
+            'id': 12,
+        },
+        {},
+        ...
+    ],
+
+    ...
+
+    'index_3f_cfyp': [
+        {
+            'id': 114,
+        }.
+        {},
+        ...
+    ],
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 1,手机数码
