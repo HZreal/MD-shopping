@@ -38,5 +38,9 @@ urlpatterns = [
     # 省市区地区管理子应用
     path('', include('areas.urls')),
 
+    # 商品子应用
+    path('', include(('goods.urls', 'goods'), namespace='goods')),
+
+
 
 ]

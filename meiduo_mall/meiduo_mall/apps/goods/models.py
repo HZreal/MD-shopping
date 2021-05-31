@@ -5,7 +5,7 @@ from meiduo_mall.utils.models import BaseModel
 
 
 
-
+# 自关联表
 class GoodsCategory(BaseModel):
     """商品类别"""
     name = models.CharField(max_length=10, verbose_name='名称')
@@ -18,6 +18,7 @@ class GoodsCategory(BaseModel):
 
     def __str__(self):
         return self.name
+    objects = models.Manager()
 
 
 class GoodsChannelGroup(BaseModel):
@@ -99,7 +100,12 @@ class SKU(BaseModel):
     sales = models.IntegerField(default=0, verbose_name='销量')
     comments = models.IntegerField(default=0, verbose_name='评价数')
     is_launched = models.BooleanField(default=True, verbose_name='是否上架销售')
-    default_image_url = models.CharField(max_length=200, default='', null=True, blank=True, verbose_name='默认图片')
+
+    # default_image_url = models.CharField(max_length=200, default='', null=True, blank=True, verbose_name='默认图片')
+    # ImageField是用于保存图像文件的字段，有url这个属性，而CharField没有url这个属性
+    default_image = models.ImageField(max_length=200, default='', null=True, blank=True, verbose_name='默认图片')
+
+    objects = models.Manager()
 
     class Meta:
         db_table = 'tb_sku'
@@ -108,6 +114,7 @@ class SKU(BaseModel):
 
     def __str__(self):
         return '%s: %s' % (self.id, self.name)
+
 
 
 class SKUImage(BaseModel):
