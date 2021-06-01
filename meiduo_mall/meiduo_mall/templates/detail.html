@@ -115,12 +115,12 @@
 	</div>
 
 	<div class="goods_detail_con clearfix">
-		<div class="goods_detail_pic fl"><img src="{{ static('images/goods_450.jpg') }}"></div>
+		<div class="goods_detail_pic fl"><img src="{{ sku.default_image.url }}"></div>
 		<div class="goods_detail_list fr">
-			<h3>Apple MacBook Pro 13.3英寸笔记本 银色</h3>
-			<p>【全新2017款】MacBook Pro,一身才华，一触，即发 了解【黑五返场特惠】 更多产品请点击【美多官方Apple旗舰店】</p>
+			<h3>{{ sku.name }}</h3>
+			<p>{{ sku.caption }}</p>
 			<div class="price_bar">
-				<span class="show_pirce">¥<em>11388.00</em></span>
+				<span class="show_pirce">¥<em>{{ sku.price }}</em></span>
 				<a href="javascript:;" class="goods_judge">18人评价</a>
 			</div>
 			<div class="goods_num clearfix">
@@ -131,28 +131,29 @@
                     <a @click="on_minus" class="minus fr">-</a>
 				</div> 
 			</div>
-			<div class="type_select">
-				<label>屏幕尺寸:</label>
-				<a href="javascript:;" class="select">13.3英寸</a>
-				<a href="javascript:;">15.4英寸</a>
-			</div>
-			<div class="type_select">
-				<label>颜色:</label>
-				<a href="javascript:;" class="select">深灰色</a>
-				<a href="javascript:;">银</a>
-			</div>
-			<div class="type_select">
-				<label>版本:</label>
-				<a href="javascript:;" class="select">core i5/8G内存/256G存储</a>
-				<a href="javascript:;">core i5/8G内存/128G存储</a>
-				<a href="javascript:;">core i5/8G内存/512G存储/Multi-Touch Bar</a>
-			</div>
-			<div class="total">总价：<em>11388.00元</em></div>
+
+            {% for spec in specs %}
+                <div class="type_select">
+                    <label>{{ spec.name }}:</label>
+                    {% for option in spec.spec_options %}
+                        {% if option.sku_id == sku.id %}
+                        <a href="javascript:;" class="select">{{ option.value }}</a>
+                        {% elif option.sku_id %}
+                        <a href="{{ url('goods:detail', args=(option.sku_id, )) }}">{{ option.value }}</a>
+                        {% else %}
+                        <a href="javascript:;">{{ option.value }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+			<div class="total" v-cloak>总价：<em>[[ sku_amount ]]元</em></div>
 			<div class="operate_btn">
 				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
 			</div>
 		</div>
 	</div>
+
 	<div class="main_wrap clearfix">
 		<div class="l_wrap fl clearfix">
 			<div class="new_goods">
@@ -174,24 +175,28 @@
 				<li @click="on_tab_content('service')" :class="tab_content.service?'active':''">售后服务</li>
                 <li @click="on_tab_content('comment')" :class="tab_content.comment?'active':''">商品评价(18)</li>
 			</ul>
-			<div @click="on_tab_content('detail')" class="tab_content" :class="tab_content.detail?'current':''">
+
+            <div @click="on_tab_content('detail')" class="tab_content" :class="tab_content.detail?'current':''">
 				<dl>
 					<dt>商品详情：</dt>
-					<dd>它纤薄如刃，轻盈如羽，却又比以往速度更快、性能更强大。它为你展现的，是迄今最明亮、最多彩的 Mac 笔记本显示屏。它更配备了触控栏，一个内置于键盘的玻璃面多点触控条，让你能在需要时快速取用各种工具。MacBook Pro 是对我们突破性理念的一场出色演绎，而它，也正期待着演绎你的奇思妙想。</dd>
+					<dd>{{ sku.spu.desc_detail|safe }}</dd>
 				</dl>
 			</div>
-			<div @click="on_tab_content('pack')" class="tab_content" :class="tab_content.pack?'current':''">
+
+            <div @click="on_tab_content('pack')" class="tab_content" :class="tab_content.pack?'current':''">
 				<dl>
 					<dt>规格与包装：</dt>
-					<dd>商品名称：AppleMacBook Pro 商品编号：7629508 商品毛重：2.53kg 商品产地：中国大陆 系统：MAC</dd>
+					<dd>{{ sku.spu.desc_pack|safe }}</dd>
 				</dl>
 			</div>
-			<div @click="on_tab_content('service')" class="tab_content" :class="tab_content.service?'current':''">
+
+            <div @click="on_tab_content('service')" class="tab_content" :class="tab_content.service?'current':''">
 				<dl>
 					<dt>售后服务：</dt>
-					<dd>本产品全国联保，享受三包服务，质保期为：1年质保</dd>
+					<dd>{{ sku.spu.desc_service|safe }}</dd>
 				</dl>
 			</div>
+
             <div @click="on_tab_content('comment')" class="tab_content" :class="tab_content.comment?'current':''">
 				<ul class="judge_list_con">
 					<li class="judge_list fl">
@@ -224,7 +229,7 @@
 	</div>
     <script type="text/javascript">
 		let category_id = "{{ sku.category.id }}";
-		let sku_price = "";
+		let sku_price = "{{ sku.price }}";
         let sku_id = "";
     </script>
 	<script type="text/javascript" src="{{ static('js/common.js') }}"></script>

@@ -6,9 +6,9 @@ let vm = new Vue({
         hot_skus: [],
         category_id: category_id,
 		sku_id: sku_id,
-        sku_price: sku_price,
+        sku_price: sku_price,                   // 商品单价
         sku_count: 1,
-        sku_amount: 0,
+        sku_amount: 0,                          // 总价
         tab_content: {
 		    detail: true,
             pack: false,
