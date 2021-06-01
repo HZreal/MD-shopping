@@ -80,7 +80,30 @@ class HotGoodsView(View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'hot_skus': hot_skus})
 
 
+# 商品详情
+class DetailView(View):
+    def get(self, request, sku_id):
+        # 接收校验参数
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            # return http.HttpResponseNotFound('sku_id不存在')
+            return render(request, '404.html')
 
+        # 查询商品分类
+        categories = get_categories()
+
+        # 查询面包屑导航
+        breadcrumb = get_breadcrumb(sku.category)
+
+        # 查询SKU信息
+
+        context = {
+            'categories': categories,
+            'breadcrumb': breadcrumb,
+            'sku': sku,
+        }
+        return render(request, 'detail.html', context)
 
 
 

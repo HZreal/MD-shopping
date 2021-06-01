@@ -21,6 +21,9 @@ from django.urls import path, include,re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # haystack
+    path('search/', include('haystack.urls')),                                      # 全文检索
+
     # 用户子应用
     path('', include(('users.urls', 'users'), namespace='users')),                  # users 指定命名空间，必须设置app_name
     # re_path(r'^$', include('users.urls')),                                        # TODO 所有路由在总路由校验匹配

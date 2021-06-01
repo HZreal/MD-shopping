@@ -93,6 +93,19 @@ DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
 # FastDFS服务器路由
 FDFS_BASE_URL = 'http://192.168.94.131:8888/'
 
+# Haystack配置
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://192.168.94.131:9200/',                         # Elasticsearch服务器ip地址，端口号固定为9200
+        'INDEX_NAME': 'meiduo_mall',                                  # Elasticsearch建立的索引库的名称
+    },
+}
+# 当Haystack检测到数据库添加、修改、删除数据时，自动生成新的索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+# Haystack设置分页器每页显示记录数量，不指定默认仅一页显示所有
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
+
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
 # print(sys.path)                                                     # PYTHONPATH 是一个列表，python解释器对模块的搜索按列表中的顺序搜索
@@ -126,7 +139,7 @@ INSTALLED_APPS = [
     'oauth',                                            # oauth2.0认证
     'areas',                                            # 省市区
     'goods',                                            # 商品
-
+    'haystack',                                         # 全文检索
 
 
 
