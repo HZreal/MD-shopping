@@ -21,7 +21,7 @@ from django.urls import path, include,re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # haystack
+    # haystack子应用
     path('search/', include('haystack.urls')),                                      # 全文检索
 
     # 用户子应用

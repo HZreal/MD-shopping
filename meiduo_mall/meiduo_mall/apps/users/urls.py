@@ -50,6 +50,10 @@ urlpatterns = [
     # 显示修改密码页面
     path('password/', views.ChangePasswordView.as_view(), name='password'),
 
+    # 商品sku详情页面 接收axios请求 保存用户浏览记录(post) 获取用户浏览记录(get)
+    path('browse_histories/', views.UserBrowseHistory.as_view()),
+
+
 
 ]
 

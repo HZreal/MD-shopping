@@ -1,12 +1,16 @@
 from django.shortcuts import render
 from django.views import View
 from django import http
-from goods.models import GoodsCategory, SKU
+from goods.models import GoodsCategory, SKU, GoodsVisitCount
 from contents.utils import get_categories
 from goods.utils import get_breadcrumb
 from django.core.paginator import Paginator, EmptyPage
 from meiduo_mall.utils.response_code import RETCODE
 from goods import constants
+from django.utils import timezone           # 处理时间的工具
+from datetime import datetime
+
+
 
 class ListView(View):
     def get(self, request, category_id, page_num):              # 从首页点击三级分类进入此视图时，page_num默认是1
@@ -96,36 +100,60 @@ class DetailView(View):
         # 查询面包屑导航
         breadcrumb = get_breadcrumb(sku.category)
 
-        # 构建当前商品的规格键
-        sku_specs = sku.specs.order_by('spec_id')
-        sku_key = []
-        for spec in sku_specs:
-            sku_key.append(spec.option.id)
-        # 获取当前商品的所有SKU
+
+        # 构建当前sku的规格键
+        sku_specs = sku.specs.order_by('spec_id')                       # sku_specs即是当前sku拥有的规格对象集
+        # sku_key = []
+        # for spec in sku_specs:
+        #     sku_key.append(spec.option.id)
+        sku_key = [spec.option.id for spec in sku_specs]                # sku_key即是当前sku拥有的规格的id组成的列表
+
+        # 获取当前商品sku所在spu类下的所有SKU
         skus = sku.spu.sku_set.all()
         # 构建不同规格参数（选项）的sku字典
         spec_sku_map = {}
         for s in skus:
-            # 获取sku的规格参数
+            # 获取某个sku拥有的规格
             s_specs = s.specs.order_by('spec_id')
-            # 用于形成规格参数-sku字典的键
-            key = []
-            for spec in s_specs:
-                key.append(spec.option.id)
-            # 向规格参数-sku字典添加记录
+            # 用于形成规格选项-sku字典的键
+            # key = []
+            # for spec in s_specs:
+            #     key.append(spec.option.id)
+            key = [spec.option.id for spec in s_specs]              # sku拥有的规格的id组成的列表
+            # m = tuple(key)
+            # 向规格选项-sku字典添加记录
             spec_sku_map[tuple(key)] = s.id
+
         # 获取当前商品的规格信息
+        # goods_specs = [
+        #    {
+        #        'name': '屏幕尺寸',
+        #        'options': [
+        #            {'value': '13.3寸', 'sku_id': xxx},
+        #            {'value': '15.4寸', 'sku_id': xxx},
+        #        ]
+        #    },
+        #    {
+        #        'name': '颜色',
+        #        'options': [
+        #            {'value': '银色', 'sku_id': xxx},
+        #            {'value': '黑色', 'sku_id': xxx}
+        #        ]
+        #    },
+        #    ...
+        # ]
+        # 获取当前sku所在spu类拥有的规格信息(goods_specs即spu规格对象集)
         goods_specs = sku.spu.specs.order_by('id')
-        # 若当前sku的规格信息不完整，则不再继续
+        # 若当前sku的规格信息不完整，则不再继续(当前sku的规格条数不能小于当前sku所在spu类所拥有的规格条数)
         if len(sku_key) < len(goods_specs):
             return
-        for index, spec in enumerate(goods_specs):
-            # 复制当前sku的规格键
+        for index, spec in enumerate(goods_specs):                                    # enumerate()函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据下标(默认从0开始，亦可start指定)和数据，一般用在 for 循环当中
+            # 复制当前sku的规格键(切片不指定开始和结尾索引即保留所有，也就是复制)
             key = sku_key[:]
-            # 该规格的选项
-            spec_options = spec.options.all()
+            # 该spu规格拥有的选项
+            spec_options = spec.options.all()                       # spec_options即某个spu规格的选项对象集
             for option in spec_options:
-                # 在规格参数sku字典中查找符合当前规格的sku
+                # 在规格选项sku字典中查找符合当前规格的sku
                 key[index] = option.id
                 option.sku_id = spec_sku_map.get(tuple(key))
             spec.spec_options = spec_options
@@ -140,12 +168,44 @@ class DetailView(View):
         return render(request, 'detail.html', context)
 
 
+# 统计三级类别商品的访问量(用于后台管理使用)
+class DetailVisitView(View):
+    def post(self, request, category_id):
+        # 接收校验参数
+        try:
+            category = GoodsCategory.objects.get(id=category_id)
+        except GoodsCategory.DoesNotExist:
+            return http.HttpResponseForbidden('category_id不存在')
 
+        # 获取当天日期：localtime会以设置文件中的时区TIME_ZONE为条件读取时间
+        t = timezone.localtime()
+        # 构造当天时间字符串：'%d-%02d-%02d' 或 '%d:%02d:%02d'  根据需求
+        today_str = '%d-%02d-%02d' % (t.year, t.month, t.day)
+        # 字符串转成当天时间对象datetime(调用strptime方法)，才能与date字段类型匹配
+        today_date = datetime.strptime(today_str, '%Y-%m-%d')                                   # TODO python时间输出格式: %Y-%m-%d (%Y即2019年，%y即19年)
+        # datetime.strftime()作用相反，将时间对象转字符串
 
+        # 统计访问量
+        # 先判断当天中指定的分类商品对应的记录是否存在
+        try:
+            # 如果存在拿到记录对象
+            # GoodsVisitCount.objects.filter(date=today_date, category_id=category.id)
+            # GoodsVisitCount.objects.filter(date=today_date, category_id=category_id)
+            count_data = GoodsVisitCount.objects.get(date=today_date, category=category)            # 某一天的数据，要么存在要么不存在，不需用filter
+        except GoodsVisitCount.DoesNotExist:
+            # 如果不存在则创建记录对象(这里用初始化类的方法，而不用create，原因是不确定字段)
+            count_data = GoodsVisitCount()
+        # 设置字段值
+        try:
+            count_data.category = category                 # 对象不存在则设置，存在则覆盖
+            count_data.date = today_date                   # 此行代码可不写，原因是模型类属性date设置了auto_now_add=True
+            count_data.count += 1
+            count_data.save()
+        except Exception as e:
+            return http.HttpResponseServerError('统计失败')
 
-
-
-
+        # 返回响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
 
 
 

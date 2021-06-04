@@ -14,7 +14,7 @@ from meiduo_mall.utils.response_code import RETCODE                      # 将�
 from meiduo_mall.utils.views import LoginRequiredJSONMixin
 from django_redis import get_redis_connection
 from celery_tasks.email.tasks import send_verify_email
-
+from goods.models import SKU
 
 
 
@@ -200,7 +200,7 @@ class UserInfoView(LoginRequiredMixin, View):
             'email': request.user.email,
             'email_active': request.user.email_active,
         }
-        print(context)
+
         return render(request, 'user_center_info.html', context)
 
 
@@ -538,21 +538,58 @@ class ChangePasswordView(LoginRequiredMixin, View):
         return response
 
 
+# 商品sku详情页面接收axios请求保存/查询用户浏览记录
+class UserBrowseHistory(LoginRequiredJSONMixin, View):
+    # 保存用户浏览记录(用户一访问某sku详情则自动转入此post)
+    def post(self, request):
+        # 接收参数
+        json_str = request.body.decode()
+        data = json.loads(json_str)
+        sku_id = data.get('sku_id')
+        # 校验参数
+        try:
+            SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('参数sku_id错误')
+
+        # 保存sku_id到redis数据库3号库
+        redis_conn = get_redis_connection('history')
+        # 用管道操作redis：以下操作命令需依次进行，任何一个卡顿都影响效率
+        pl = redis_conn.pipeline()
+        # 选择redis的list数据类型，自定义key
+        key = 'history_%s' % request.user.id
+        # 先去重复：若库中存在，则删除库中的sku_id    lrem(key,count,value)表示从左(count>0)/从右(count<0)删除count个值等于value的元素,count=0时删除值等于value的元素，即去重
+        pl.lrem(key, 0, sku_id)
+        # 再保存(左插)：最近浏览的sku排在前面
+        pl.lpush(key, sku_id)
+        # 最后截取：取前5个予以展示， ltrim(key,start,stop)表示截取start到stop的元素
+        pl.ltrim(key, 0, 4)
+        pl.execute()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
 
 
+    # 查询获取用户浏览记录(用户个人信息中心页面展示)
+    def get(self, request):
+        # 查询redis取出该用户最近浏览sku_id列表
+        redis_conn = get_redis_connection('history')
+        sku_id_list = redis_conn.lrange('history_%s' % request.user.id, 0, -1)        # 0, 4 亦可
+        # 循环查询每个sku_id对应的sku信息，并将模型类转字典
+        skus = []
+        for sku_id in sku_id_list:
+            try:
+                sku = SKU.objects.get(id=sku_id)
+            except SKU.DoexNotExist:
+                return http.HttpResponseServerError('参数错误')
+            skus.append({
+                'id': sku.id,
+                'name': sku.name,
+                'price': sku.price,
+                'default_image_url': sku.default_image.url,
+            })
 
-
-
-
-
-
-
-
-
-
-
-
-
+        # 返回响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'skus': skus})
 
 
 

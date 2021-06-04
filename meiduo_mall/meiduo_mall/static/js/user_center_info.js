@@ -14,6 +14,8 @@ let vm = new Vue({
         // disabled 属性可设置或返回是否禁用单选按钮，即后端保存了邮箱则设置send_email_btn_disabled=true 使保存按钮禁用
         send_email_btn_disabled: false,
         send_email_tip: '重新发送验证邮件',
+
+        // 存放后端传过来的5条最近浏览sku信息
         histories: [],
     },
 
@@ -25,7 +27,7 @@ let vm = new Vue({
         this.set_email = (this.email=='') ? true : false;                             // 邮箱为空则置true
 
         // 请求浏览历史记录
-        // this.browse_histories();
+        this.browse_histories();
     },
     methods: {
         // 检查email格式
@@ -73,19 +75,19 @@ let vm = new Vue({
                     });
             }
         },
+
         // 请求浏览历史记录
         browse_histories(){
             let url = '/browse_histories/';
             axios.get(url, {
                 responseType: 'json'
-            })
-                .then(response => {
+            }).then(response => {
                     this.histories = response.data.skus;
                     for(let i=0; i<this.histories.length; i++){
+                        // 将a标签href属性设置为'detail/sku_id/'点击转到该商品详情页
                         this.histories[i].url = '/detail/' + this.histories[i].id + '/';
                     }
-                })
-                .catch(error => {
+                }).catch(error => {
                     console.log(error.response);
                 })
         },

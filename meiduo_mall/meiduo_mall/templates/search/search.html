@@ -69,8 +69,9 @@
 {#                    </li>#}
                 {% for result in page %}
                    <li>
-                        <a href="detail.html"><img src="{{ result.object.default_image.url }}"></a>
-                        <h4><a href="detail.html">{{ result.object.name }}</a></h4>
+{#                        result.object获取的即是当前sku对象                #}
+                        <a href="{{ url('goods:detail', args=(result.object.id,)) }}"><img src="{{ result.object.default_image.url }}"></a>
+                        <h4><a href="{{ url('goods:detail', args=(result.object.id,)) }}">{{ result.object.name }}</a></h4>
                         <div class="operate">
                             <span class="price">{{ result.object.price }}</span>
                             <span>{{ result.object.comments }}评价</span>
