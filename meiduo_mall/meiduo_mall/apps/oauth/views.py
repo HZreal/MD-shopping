@@ -13,6 +13,8 @@ from oauth.models import OAuthQQUser
 from django.contrib.auth import login,logout
 from oauth.utils import generate_access_token, check_access_token
 from users.views import User
+from carts.utils import merge_cart_cookies_redis
+
 
 # 创建日志输出器
 logger = logging.getLogger('django')
@@ -70,6 +72,10 @@ class QQAuthUserView(View):
             next = request.GET.get('state')                                  # 取出多次请求一直携带的参数state
             response = redirect(next)
             response.set_cookie('username', oauth_user.user.username, max_age=3600 * 24 * 14)
+
+            # 用户登陆成功，合并cookie购物车到redis购物车
+            response = merge_cart_cookies_redis(request, oauth_user.user, response)
+
             return response
 
 
@@ -125,6 +131,10 @@ class QQAuthUserView(View):
         next = request.GET.get('state')
         response = redirect(next)
         response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+
+        # 用户登陆成功，合并cookie购物车到redis购物车
+        response = merge_cart_cookies_redis(request, user, response)
+
         return response
 
 

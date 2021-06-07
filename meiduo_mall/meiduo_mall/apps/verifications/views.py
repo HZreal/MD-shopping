@@ -16,7 +16,28 @@ from celery_tasks.sms.tasks import send_sms_code
 # 创建日志器对象，参数是配置信息的key
 logger = logging.getLogger('django')
 
-# 短信验证码
+
+
+# 生成图形验证码，返给前端，存入redis
+class ImageCodeView(View):
+    def get(self, request, uuid):
+        # TODO uuid是唯一标识图形验证码所属用户，此时未注册，无法用用户名唯一标识！！！
+        # 接收、校验参数(路径参数已正则校验格式)
+
+        # 实现业务逻辑：
+        # 生成图形验证码：通过captcha对象的generate_captcha()方法
+        text, image = captcha.generate_captcha()
+        # 保存图形验证码的text文本到redis的2号库
+        redis_conn = get_redis_connection(alias='verify_code')                             # 参数alias类型str，指向redis配置信息CACHES中的key，默认是'default',即0号库，返回连接对象
+        # redis_conn.setex('key', 'expires', 'value')                                      # 查看setex()命令
+        redis_conn.setex('img_%s' % uuid, constants.IMAGE_CODE_REDIS_EXPIRES, text)                                       # img_%s' % uuid 表示给uuid拼一个前缀，统一化
+
+        # 返回响应
+        return http.HttpResponse(content=image, content_type='image/jpg')
+
+
+
+# 生成短信验证码
 class SMSCodeView(View):
     def get(self, request, mobile):
         # 接收参数
@@ -77,23 +98,6 @@ class SMSCodeView(View):
         return http.JsonResponse({'code': RETCODE.OK, 'error_mesaage': '发送短信验证码成功'})
 
 
-
-# 生成图形验证码，返给前端，存入redis
-class ImageCodeView(View):
-    def get(self, request, uuid):
-        # uuid是唯一标识图形验证码所属用户，此时未注册，无法用用户名唯一标识
-        # 接收、校验参数(路径参数已正则校验)
-
-        # 实现业务逻辑：
-        # 生成图形验证码：通过captcha对象的generate_captcha()方法
-        text, image = captcha.generate_captcha()
-        # 保存图形验证码的text文本到redis的2号库
-        redis_conn = get_redis_connection(alias='verify_code')                             # 参数alias类型str，指向redis配置信息CACHES中的key，默认是'default',即0号库，返回连接对象
-        # redis_conn.setex('key', 'expires', 'value')                                      # 查看setex()命令
-        redis_conn.setex('img_%s' % uuid, constants.IMAGE_CODE_REDIS_EXPIRES, text)                                       # img_%s' % uuid 表示给uuid拼一个前缀，统一化
-
-        # 返回响应
-        return http.HttpResponse(content=image, content_type='image/jpg')
 
 
 

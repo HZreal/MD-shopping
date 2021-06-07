@@ -52,10 +52,10 @@ let vm = new Vue({
     },
 
     methods: {
-        // 生成图形验证码，封装成函数易复用，方便页面加载时调用，点击时也调用
+        // 生成图形验证码，封装成函数易复用，方便页面加载完成时调用，点击时也调用
         // 这里实际是vue调用commen.js生成uuid给img标签的src属性赋值，然后自动发送请求到后端，让后端生成验证码并返回
         generate_image_code(){
-            this.uuid = generateUUID();
+            this.uuid = generateUUID();                             // uuid 作为此未登录用户的唯一标识！！！
             this.image_code_url = '/image_codes/' + this.uuid + '/';                // img标签的src属性一被赋予链接地址就会自动发送请求，无需手动发送
         },
 

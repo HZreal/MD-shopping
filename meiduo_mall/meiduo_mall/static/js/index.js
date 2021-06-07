@@ -17,8 +17,7 @@ let vm = new Vue({
             let url = '/carts/simple/';
             axios.get(url, {
                 responseType: 'json',
-            })
-                .then(response => {
+            }).then(response => {
                     this.carts = response.data.cart_skus;
                     this.cart_total_count = 0;
                     for(let i=0;i<this.carts.length;i++){
@@ -27,8 +26,7 @@ let vm = new Vue({
                         }
                         this.cart_total_count += this.carts[i].count;
                     }
-                })
-                .catch(error => {
+                }).catch(error => {
                     console.log(error.response);
                 })
         }

@@ -15,7 +15,7 @@ from meiduo_mall.utils.views import LoginRequiredJSONMixin
 from django_redis import get_redis_connection
 from celery_tasks.email.tasks import send_verify_email
 from goods.models import SKU
-
+from carts.utils import merge_cart_cookies_redis
 
 
 # 创建日志器
@@ -153,11 +153,16 @@ class LoginView(View):
         # 取出查询字符串参数next
         next = request.GET.get('next')
         if next:
-            return redirect(next)                      # 若有next,则直接重定向到next对应的路由
+            response = redirect(next)                      # 若有next,则直接重定向到next对应的路由
+        else:
+            response = redirect(reverse('contents:index'))
 
         # 为了实现首页右上角展示用户名信息，将用户名缓存到cookie中,由前端vue调用cookie信息渲染
-        response = redirect(reverse('contents:index'))
         response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+
+        # 用户登陆成功，合并cookie购物车到redis购物车
+        response = merge_cart_cookies_redis(request, user, response)
+
         # 响应结果,重定向到首页
         return response
 

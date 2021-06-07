@@ -148,7 +148,8 @@ let vm = new Vue({
                     if (response.data.code == '0') {
                         alert('添加购物车成功');
                         this.cart_total_count += this.sku_count;
-                    } else { // 参数错误
+                    }
+                    else { // 参数错误
                         alert(response.data.errmsg);
                     }
                 }).catch(error => {

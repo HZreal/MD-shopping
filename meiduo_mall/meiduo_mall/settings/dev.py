@@ -140,7 +140,7 @@ INSTALLED_APPS = [
     'areas',                                            # 省市区
     'goods',                                            # 商品
     'haystack',                                         # 全文检索
-
+    'carts',                                            # 购物车
 
 
 
