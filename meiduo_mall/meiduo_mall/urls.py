@@ -47,6 +47,10 @@ urlpatterns = [
     # 购物车子应用
     path('', include(('carts.urls', 'carts'), namespace='carts')),
 
+    # 订单子应用
+    path('', include(('orders.urls', 'orders'), namespace='orders')),
+
+
 
 
 ]

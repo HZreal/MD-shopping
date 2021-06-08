@@ -18,6 +18,7 @@ from goods.models import SKU
 from carts.utils import merge_cart_cookies_redis
 
 
+
 # 创建日志器
 logger = logging.getLogger('django')
 
@@ -595,9 +596,6 @@ class UserBrowseHistory(LoginRequiredJSONMixin, View):
 
         # 返回响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'skus': skus})
-
-
-
 
 
 

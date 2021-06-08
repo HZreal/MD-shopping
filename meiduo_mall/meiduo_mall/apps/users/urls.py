@@ -54,7 +54,6 @@ urlpatterns = [
     path('browse_histories/', views.UserBrowseHistory.as_view()),
 
 
-
 ]
 
 

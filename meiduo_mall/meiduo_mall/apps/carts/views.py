@@ -105,9 +105,9 @@ class CartsView(View):
         if user.is_authenticated:          # 用户已登录，查询redis购物车
             redis_coon = get_redis_connection('carts')
             # 查询hash数据：redis中获取的源数据都是bytes类型
-            redis_cart = redis_coon.hgetall('carts_%s' % user.id)        # 返回字典   {b'3': b'1'}
+            redis_cart = redis_coon.hgetall('carts_%s' % user.id)               # 返回字典   {b'3': b'1'}
             # 查询set数据
-            redis_selected = redis_coon.smembers('selected_%s' % user.id)      # 返回集合  {b'3', }
+            redis_selected = redis_coon.smembers('selected_%s' % user.id)       # 返回集合  {b'3', }
 
             # 将redis_cart和redis_selected合并数据，进行数据结构的构造，使之与未登录用户存入cookie信息的数据结构一致，便于统一化处理
             cart_dict = {}

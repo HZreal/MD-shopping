@@ -11,9 +11,9 @@ from django.utils import timezone           # 处理时间的工具
 from datetime import datetime
 
 
-
+# 从首页点击三级分类进入此商品列表视图时，page_num默认是1
 class ListView(View):
-    def get(self, request, category_id, page_num):              # 从首页点击三级分类进入此视图时，page_num默认是1
+    def get(self, request, category_id, page_num):
         # 获取校验参数(正则只能校验结构、类型，无法校验范围)
         try:
             # 查库看category_id(三级类别)是否存在

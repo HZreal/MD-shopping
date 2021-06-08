@@ -58,6 +58,8 @@ class Address(BaseModel):
     email = models.CharField(max_length=30, null=True, blank=True, default='', verbose_name='电子邮件')
     is_deleted = models.BooleanField(default=False, verbose_name='逻辑删除')
 
+    objects = models.Manager()
+
     class Meta:
         db_table = 'tb_address'
         verbose_name = '用户地址'
