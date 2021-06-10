@@ -15,4 +15,6 @@ urlpatterns = [
     # 用户订单信息
     re_path(r'^orders/info/(?P<page_num>\d+)/$', views.UserOrderInfoView.as_view(), name='info'),
 
+    # 点击我的订单页面待评价
+    path('orders/comment/', views.OrderCommentView.as_view()),
 ]

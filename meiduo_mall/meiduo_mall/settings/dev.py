@@ -56,6 +56,7 @@ ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1',
                  '192.168.0.103',
                  'www.meiduo.site',
+                 'https://www.meiduo.site',
                  ]
 
 
@@ -75,13 +76,13 @@ QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
 QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
 # QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback/'
 
-# 配置邮件服务器             # SIARACHOFWNZJGBO
+# 配置邮件服务器
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'                         # 指定邮件后端
 EMAIL_HOST = 'smtp.163.com'                                                           # 发邮件主机
 EMAIL_PORT = 25                                                                       # 发邮件端口
 EMAIL_HOST_USER = 'huangzhen_happy@163.com'                                           # 授权的邮箱
 EMAIL_HOST_PASSWORD = 'SIARACHOFWNZJGBO'                                              # 邮箱授权时获得的密码，非注册登录密码
-EMAIL_FROM = '开心购，舒心买<huangzhen_happy@163.com>'                                        # 发件人抬头
+EMAIL_FROM = '开心购，舒心买<huangzhen_happy@163.com>'                                # 发件人抬头
 # SMTP是用来发送邮件,IMAP、POP协议是用来接收邮件
 
 # 邮件验证地址
@@ -105,6 +106,14 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 # Haystack设置分页器每页显示记录数量，不指定默认仅一页显示所有
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
+
+# 支付宝支付SDK配置参数
+ALIPAY_APPID = '2021000117670985'
+ALIPAY_DEBUG = True
+ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
+ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'                    # 同步回调地址
+NOTIFY_URL = 'http://127.0.0.1:8000/payment/status/'                                 # 异步回调地址
+
 
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
@@ -142,7 +151,7 @@ INSTALLED_APPS = [
     'haystack',                                         # 全文检索
     'carts',                                            # 购物车
     'orders',                                           # 订单
-
+    'payment',                                          # 支付
 
 ]
 

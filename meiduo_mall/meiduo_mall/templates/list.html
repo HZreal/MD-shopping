@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<title>美多商城-商品列表</title>
-{#    前端分页器插件CSS样式：在最前面   #}
+    {#    前端分页器插件CSS样式：在最前面   #}
     <link rel="stylesheet" type="text/css" href="{{ static('css/jquery.pagination.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ static('css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
@@ -182,9 +182,11 @@
 	<script type="text/javascript">
         let category_id = "{{ category_id }}";                // 接收后端传来的category_id，并传给vue
     </script>
+
 	<script type="text/javascript" src="{{ static('js/common.js') }}"></script>
 	<script type="text/javascript" src="{{ static('js/list.js') }}"></script>
 	<script type="text/javascript" src="{{ static('js/jquery.pagination.min.js') }}"></script>
+
 	<script>
         // 页面加载完成就会执行
         $(function () {

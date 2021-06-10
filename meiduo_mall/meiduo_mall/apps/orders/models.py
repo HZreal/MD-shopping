@@ -39,8 +39,10 @@ class OrderInfo(BaseModel):
     total_count = models.IntegerField(default=1, verbose_name="商品总数")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="商品总金额")
     freight = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="运费")
+
     # choices接收一个元组(保证值不可变)，同理每一个选项也是一个二元元组(value,display_name)，value为存入数据库真实的值，display_name就是在页面中展示的
-    # 通过字段取value即orderinfo.pay_method，通过orderinfo.get_pay_method_display()取display_name，方法为get_属性_display()
+    # 通过属性取value即orderinfo对象.pay_method
+    # 通过orderinfo对象.get_pay_method_display()方法  或者  orderinfo对象.pay_method_name属性取display_name，即get_属性名_display()  或  属性名_name
     pay_method = models.SmallIntegerField(choices=PAY_METHOD_CHOICES, default=1, verbose_name="支付方式")
     status = models.SmallIntegerField(choices=ORDER_STATUS_CHOICES, default=1, verbose_name="订单状态")
 

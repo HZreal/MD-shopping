@@ -22,8 +22,8 @@ let vm = new Vue({
                         location.href = '/login/?next=/orders/info/1/';
                     }
                     else {
-                        console.log(response.data);
-                        alert(response.data.errmsg);
+                        console.log(response.data);               //控制台输出data
+                        alert(response.data.errmsg);              // 弹框提示错误
                     }
                 }).catch((error) => {
                     console.log(error.response);

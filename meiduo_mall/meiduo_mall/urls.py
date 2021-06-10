@@ -50,7 +50,7 @@ urlpatterns = [
     # 订单子应用
     path('', include(('orders.urls', 'orders'), namespace='orders')),
 
-
-
+    # 支付子应用
+    path('', include(('payment.urls', 'payment'), namespace='payment')),
 
 ]

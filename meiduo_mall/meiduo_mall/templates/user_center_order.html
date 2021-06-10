@@ -3,9 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<title>美多商城-用户中心</title>
+    <link rel="stylesheet" type="text/css" href="{{ static('css/jquery.pagination.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ static('css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
-
+    <script type="text/javascript" src="{{ static('js/jquery-1.12.4.min.js') }}"></script>
 {#    <script type="text/javascript" src="{{ static('js/vue-2.5.16.js') }}"></script>#}
 {#    <script type="text/javascript" src="{{ static('js/axios-0.18.0.min.js') }}"></script>#}
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -57,9 +58,9 @@
 		<div class="left_menu_con clearfix">
 			<h3>用户中心</h3>
 			<ul>
-				<li><a href="{{ url('users:info') }}" class="active">· 个人信息</a></li>
+				<li><a href="{{ url('users:info') }}">· 个人信息</a></li>
 				<li><a href="{{ url('users:address') }}">· 收货地址</a></li>
-                <li><a href="{{ url('orders:info', args=(1, )) }}">· 全部订单</a></li>
+                <li><a href="{{ url('orders:info', args=(1, )) }}"  class="active">· 全部订单</a></li>
 				<li><a href="{{ url('users:password') }}">· 修改密码</a></li>
 			</ul>
 		</div>
@@ -92,9 +93,11 @@
                     </tbody>
                 </table>
             {% endfor %}
+
             <div class="pagenation">
                 <div id="pagination" class="page"></div>
             </div>
+
         </div>
 	</div>
 	<div class="footer">
@@ -111,14 +114,23 @@
 		<p>电话：010-****888    京ICP备*******8号</p>
 	</div>
 	</div>
-    <script type="text/javascript">
-        {#  为了统一化，将前端渲染交给vue，同时又需要后端jinja2模板传变量，则可以先用js变量保存模板变量，再传给vue  #}
-        let username = "{{ username }}";
-        let mobile = "{{ mobile }}";
-        let email = "{{ email }}";
-        let email_active = "{{ email_active }}";
-    </script>
     <script type="text/javascript" src="{{ static('js/common.js') }}"></script>
-    <script type="text/javascript" src="{{ static('js/user_center_info.js') }}"></script>
+    <script type="text/javascript" src="{{ static('js/user_center_order.js') }}"></script>
+    <script type="text/javascript" src="{{ static('js/jquery.pagination.min.js') }}"></script>
+    <script>
+        // 页面加载完成就会执行
+        $(function () {
+            // 做分页器插件有四点：1.导入分页器插件JS，2.导入分页器样式CSS，3.写分页器标签，4.写分页器js文件代码
+            $('#pagination').pagination({
+                currentPage: {{ page_num }},                   // 当前所在页码
+                totalPage: {{ total_page }},                   // 总页数
+                callback: function(current){                   // 回调函数：用户点击页号发送的请求(参数current接收用户点击的页号)
+                    // location.href = 'orders/info/page_num/';
+                    location.href = '/orders/info/' + current;
+                }
+            })
+        });
+    </script>
+
 </body>
 </html>

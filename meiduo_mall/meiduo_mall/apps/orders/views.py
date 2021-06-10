@@ -144,7 +144,7 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
 
                         # 获取要提交订单的商品的数量，且判断是否超过库存
                         sku_count = new_cart_dict.get(sku_id)
-                        if sku_count > origin_sales:
+                        if sku_count > origin_stock:
                             # 库存不足需要回滚至保存点
                             transaction.savepoint_rollback(save_point)
                             return http.JsonResponse({'code': RETCODE.STOCKERR, 'errmsg': '库存不足'})
@@ -268,7 +268,7 @@ class UserOrderInfoView(LoginRequiredMixin, View):
             return http.HttpResponseNotFound('订单不存在')
 
         context = {
-            "page_orders": page_orders,
+            "page_orders": page_orders,                      # 一页的订单对象集
             'total_page': total_page,
             'page_num': page_num,
         }
@@ -276,15 +276,32 @@ class UserOrderInfoView(LoginRequiredMixin, View):
 
 
 
+"""订单商品评价"""
+class OrderCommentView(LoginRequiredMixin, View):
+    # 转到评价页面
+    def get(self, request):
+        order_id = request.GET.get('order_id')
+
+
+        context = {
+
+        }
+        return render(request, '', context)
 
 
 
+    # 接收用户提交的评价
+    def post(self, request):
+        data = json.loads(request.body.decode())
+        order_id = data.get('order_id')
+        sku_id = data.get('sku_id')
+        score = data.get('score')
+        comment = data.get('comment')
+        is_anonymous = data.get('is_anonymous')
 
 
 
-
-
-
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '评价成功'})
 
 
 

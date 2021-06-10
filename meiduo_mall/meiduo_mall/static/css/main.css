@@ -887,7 +887,7 @@ html,body{height:100%}
 .order_goods_list .col02{width:50%;text-align:left;}
 .order_goods_list .col02 span{
 	float: left;
-	width: 197px;
+	width: 190px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;

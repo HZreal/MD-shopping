@@ -12,7 +12,7 @@ let vm = new Vue({
         // 获取热销商品数据
         this.get_hot_skus();
         // 获取简单购物车数据
-        // this.get_carts();
+        this.get_carts();
     },
     methods: {
     	// 获取热销商品数据
