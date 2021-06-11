@@ -11,6 +11,7 @@ from django.utils import timezone           # 处理时间的工具
 from datetime import datetime
 
 
+
 # 从首页点击三级分类进入此商品列表视图时，page_num默认是1
 class ListView(View):
     def get(self, request, category_id, page_num):
@@ -86,7 +87,7 @@ class HotGoodsView(View):
 
 # 商品详情
 class DetailView(View):
-    def get(self, request, sku_id):
+    def get(self, request, sku_id):               # 若sku_id=4
         # 接收校验参数
         try:
             sku = SKU.objects.get(id=sku_id)
@@ -101,30 +102,42 @@ class DetailView(View):
         breadcrumb = get_breadcrumb(sku.category)
 
 
-        # 构建当前sku的规格键
-        sku_specs = sku.specs.order_by('spec_id')                       # sku_specs即是当前sku拥有的规格对象集
+        # 1.获取当前sku的具体信息
+        # 获取当前sku拥有的规格对象集sku_specs
+        sku_specs = sku.specs.order_by('spec_id')                    # [颜色, 内存]
+        # 遍历每个规格，获取当前sku拥有的选项id组成的列表sku_key
         # sku_key = []
         # for spec in sku_specs:
         #     sku_key.append(spec.option.id)
-        sku_key = [spec.option.id for spec in sku_specs]                # sku_key即是当前sku拥有的规格的id组成的列表
+        sku_key = [spec.option.id for spec in sku_specs]                # [8, 12]
 
-        # 获取当前商品sku所在spu类下的所有SKU
-        skus = sku.spu.sku_set.all()
-        # 构建不同规格参数（选项）的sku字典
+
+        # 2.获取当前商品sku所在spu类下的所有SKU
+        skus = sku.spu.sku_set.all()                                   # [sku3, sku4, sku5, sku6, sku7, sku8]
+        # 构建不同规格选项的sku字典
         spec_sku_map = {}
+        # 遍历每个sku，查询出其具体规格，选项，结果集存储在构建的spec_sku_map字典中
         for s in skus:
             # 获取某个sku拥有的规格
             s_specs = s.specs.order_by('spec_id')
-            # 用于形成规格选项-sku字典的键
-            # key = []
-            # for spec in s_specs:
-            #     key.append(spec.option.id)
-            key = [spec.option.id for spec in s_specs]              # sku拥有的规格的id组成的列表
-            # m = tuple(key)
+            # 当前sku所拥有的选项id列表s_key，作为spec_sku_map字典的键
+            s_key = [spec.option.id for spec in s_specs]
             # 向规格选项-sku字典添加记录
-            spec_sku_map[tuple(key)] = s.id
+            spec_sku_map[tuple(s_key)] = s.id
+        # sku_id=4时构造结果如下：
+        # spec_sku_map = {
+        #     (8, 11): 3,                                 # 规格选项组成元组作为字典key，sku_id作为字典value，规格决定sku是谁
+        #     (8, 12): 4,
+        #      ...
+        #     (10, 12): 8,
+        # }
 
-        # 获取当前商品的规格信息
+
+        # 3.获取当前sku所在spu类拥有的规格信息(goods_specs即spu规格对象集)
+        goods_specs = sku.spu.specs.order_by('id')                  # [颜色(id=4), 内存(id=5)]
+        # 若当前sku的规格信息不完整，则不再继续(当前sku的规格条数不能大于当前sku所在spu类所拥有的规格条数)
+        if len(sku_key) < len(goods_specs):
+            return
         # goods_specs = [
         #    {
         #        'name': '屏幕尺寸',
@@ -142,28 +155,32 @@ class DetailView(View):
         #    },
         #    ...
         # ]
-        # 获取当前sku所在spu类拥有的规格信息(goods_specs即spu规格对象集)
-        goods_specs = sku.spu.specs.order_by('id')
-        # 若当前sku的规格信息不完整，则不再继续(当前sku的规格条数不能小于当前sku所在spu类所拥有的规格条数)
-        if len(sku_key) < len(goods_specs):
-            return
-        for index, spec in enumerate(goods_specs):                                    # enumerate()函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据下标(默认从0开始，亦可start指定)和数据，一般用在 for 循环当中
-            # 复制当前sku的规格键(切片不指定开始和结尾索引即保留所有，也就是复制)
+
+
+        # 4.用于前端用户点击某规格选项时，立即映射sku_id发给后端，即给选项对象绑定sku_id
+        # enumerate()函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据下标(默认从0开始，亦可start指定)和数据，一般用在 for 循环当中
+        for index, spec in enumerate(goods_specs):                            # goods_specs为[颜色(id=4), 内存(id=5)]
+            # 复制当前sku的选项列表(切片不指定开始和结尾索引即保留所有，也就是复制)
             key = sku_key[:]
-            # 该spu规格拥有的选项
-            spec_options = spec.options.all()                       # spec_options即某个spu规格的选项对象集
-            for option in spec_options:
-                # 在规格选项sku字典中查找符合当前规格的sku
-                key[index] = option.id
-                option.sku_id = spec_sku_map.get(tuple(key))
+            # spu规格拥有的选项对象集
+            spec_options = spec.options.all()
+            for option in spec_options:                                       # spec_options为[金色(id=8)，深灰色(id=9)，银色(id=10)]      [64GB(id=11), 256GB(id=12)]
+                # 遍历选项，为每个选项对象设置属性sku_id
+                key[index] = option.id                          # 当前选项与原sku_key列表中剩余选项组合，在spec_sku_map字典中查询对应的sku_id
+
+                # 给每个选项对象动态绑定一个sku_id
+                option.sku_id = spec_sku_map.get(tuple(key))                  # 设置结果：金色对象.sku_id=4；深灰色对象.sku_id=6；银色对象.sku_id=8；64GB对象.sku_id=3； 256GB对象.sku_id=4
+                # 选项对象设置了属性sku_id后，jinja2模板渲染时就可以调用模型类
+
+            # 当前规格对象动态设置属性spec_options，保存规格对象拥有的选项列表(jinja2模板可调用此属性遍历获取选项对象)
             spec.spec_options = spec_options
 
 
         context = {
             'categories': categories,
             'breadcrumb': breadcrumb,
-            'sku': sku,
-            'specs': goods_specs,
+            'sku': sku,                                # 传入当前sku对象给前端特别样式处理：高亮展示
+            'specs': goods_specs,                      # 页面渲染需要当前sku所在spu类下的所有规格选项
         }
         return render(request, 'detail.html', context)
 

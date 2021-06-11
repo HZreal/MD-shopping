@@ -26,6 +26,8 @@ class IndexView(View):
             'categories': categories,
             'contents': contents,
         }
+
+        # render封装了获取模板文件、渲染模板文件、将html字符串作为响应体发送给浏览器解析
         return render(request, 'index.html', context)
 
 

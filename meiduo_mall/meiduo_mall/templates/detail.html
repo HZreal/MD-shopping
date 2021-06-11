@@ -127,16 +127,21 @@
 				</div> 
 			</div>
 
+{#            展示当前sku所在spu类下的所有规格选项，并把当前sku的选项高亮       #}
             {% for spec in specs %}
                 <div class="type_select">
                     <label>{{ spec.name }}:</label>
                     {% for option in spec.spec_options %}
+{#                      若选项动态绑定的sku_id为当前sku_id即高亮，样式为select          #}
                         {% if option.sku_id == sku.id %}
-                        <a href="javascript:;" class="select">{{ option.value }}</a>
+                            <a href="javascript:;" class="select">{{ option.value }}</a>
+
+{#                       点击某个选项，则映射其sku_id，发送请求获取点击的sku信息              #}
                         {% elif option.sku_id %}
-                        <a href="{{ url('goods:detail', args=(option.sku_id, )) }}">{{ option.value }}</a>
+                            <a href="{{ url('goods:detail', args=(option.sku_id, )) }}">{{ option.value }}</a>
+
                         {% else %}
-                        <a href="javascript:;">{{ option.value }}</a>
+                            <a href="javascript:;">{{ option.value }}</a>
                         {% endif %}
                     {% endfor %}
                 </div>

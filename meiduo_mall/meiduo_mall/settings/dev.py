@@ -20,7 +20,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # 注意：本模块路径为meiduo_mall/meiduo_mall/settings/dev.py
-import meiduo_mall.utils.fastdfs.fdfs_storage
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent                      # BASE_DIR指向 meiduo_mall/meiduo_mall/
 # BASE_DIR = Path(__file__).resolve().parent.parent.parent             # BASE_DIR指向 meiduo_mall/
@@ -60,61 +60,6 @@ ALLOWED_HOSTS = ['localhost',
                  ]
 
 
-# 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
-AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用名.模型类名
-
-# 指定自定义认证后端
-AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
-
-# 判断用户是否是登录，指定登录后重定向的地址
-LOGIN_URL = '/login/'
-# redirect_field_name = REDIRECT_FIELD_NAME = 'next'         # 默认是next
-
-# QQ登录的配置参数
-QQ_CLIENT_ID = '101518219'
-QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
-QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
-# QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback/'
-
-# 配置邮件服务器
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'                         # 指定邮件后端
-EMAIL_HOST = 'smtp.163.com'                                                           # 发邮件主机
-EMAIL_PORT = 25                                                                       # 发邮件端口
-EMAIL_HOST_USER = 'huangzhen_happy@163.com'                                           # 授权的邮箱
-EMAIL_HOST_PASSWORD = 'SIARACHOFWNZJGBO'                                              # 邮箱授权时获得的密码，非注册登录密码
-EMAIL_FROM = '开心购，舒心买<huangzhen_happy@163.com>'                                # 发件人抬头
-# SMTP是用来发送邮件,IMAP、POP协议是用来接收邮件
-
-# 邮件验证地址
-EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
-
-# 指定自定义的Django文件存储类
-DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
-
-# FastDFS服务器路由
-FDFS_BASE_URL = 'http://192.168.94.131:8888/'
-# http://image.meiduo.site:
-# Haystack配置
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://192.168.94.131:9200/',                         # Elasticsearch服务器ip地址，端口号固定为9200
-        'INDEX_NAME': 'meiduo_mall',                                  # Elasticsearch建立的索引库的名称
-    },
-}
-# 当Haystack检测到Mysql数据库添加、修改、删除数据时，自动生成新的索引
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-# Haystack设置分页器每页显示记录数量，不指定默认仅一页显示所有
-HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
-
-# 支付宝支付SDK配置参数
-ALIPAY_APPID = '2021000117670985'
-ALIPAY_DEBUG = True
-ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
-ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'                    # 同步回调地址
-NOTIFY_URL = 'http://127.0.0.1:8000/payment/status/'                                 # 异步回调地址
-
-
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
 # print(sys.path)                                                     # PYTHONPATH 是一个列表，python解释器对模块的搜索按列表中的顺序搜索
@@ -139,6 +84,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',                          # sessions子应用
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',                                   # 定时任务
     # 注册子应用
     # 'meiduo_mall.apps.users',                         # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
     'users',                                            # 所有子应用都定义在包apps中，
@@ -216,23 +162,30 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-# sqlite是一个嵌入式小型关系型数据库,主要是在移动端使用
-# 中型数据库：mysql(甲骨文) sqlserver(微软)
-# 大型数据库：oracle DB2
+# sqlite mysql sqlserver oracle DB2
 DATABASES = {
-    'default': {
+    'default': {               # 主机写
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
-
         'ENGINE': 'django.db.backends.mysql',
         'HOST': '192.168.94.131',
         'PORT': '3306',
         'USER': 'huangzhen',
         'PASSWORD': 'root',
         'NAME': 'meiduo',
+    },
 
+    'slave': {               # 从机读
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '192.168.94.131',
+        'PORT': '8306',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'NAME': 'meiduo',
     }
 }
+# DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
+
 
 # session数据的存储方式可以如下:
 # 方式一：Django对session的默认存储方式，可不写
@@ -344,7 +297,6 @@ STATICFILES_DIRS = [
 ]
 
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -401,10 +353,83 @@ LOGGING = {
 }
 
 
-# import logging
-# # 创建日志记录器对象，参数django就是LOGGING里loggers的配置信息
-# logger = logging.getLogger('django')
-# # 输出日志
-# logger.debug('测试logging模块debug')
-# logger.info('测试logging模块info')
-# logger.error('测试logging模块error')
+# 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
+AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用名.模型类名
+
+# 指定自定义认证后端
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
+
+# 判断用户是否是登录，指定登录后重定向的地址
+LOGIN_URL = '/login/'
+# redirect_field_name = REDIRECT_FIELD_NAME = 'next'         # 默认是next
+
+# QQ登录的配置参数
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
+# QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback/'
+
+# 配置邮件服务器
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'                         # 指定邮件后端
+EMAIL_HOST = 'smtp.163.com'                                                           # 发邮件主机
+EMAIL_PORT = 25                                                                       # 发邮件端口
+EMAIL_HOST_USER = 'huangzhen_happy@163.com'                                           # 授权的邮箱
+EMAIL_HOST_PASSWORD = 'SIARACHOFWNZJGBO'                                              # 邮箱授权时获得的密码，非注册登录密码
+EMAIL_FROM = '开心购，舒心买<huangzhen_happy@163.com>'                                # 发件人抬头
+# SMTP是用来发送邮件,IMAP、POP协议是用来接收邮件
+
+# 邮件验证地址
+EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
+
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
+
+# FastDFS服务器路由
+FDFS_BASE_URL = 'http://192.168.94.131:8888/'
+# http://image.meiduo.site:
+# Haystack配置
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://192.168.94.131:9200/',                         # Elasticsearch服务器ip地址，端口号固定为9200
+        'INDEX_NAME': 'meiduo_mall',                                  # Elasticsearch建立的索引库的名称
+    },
+}
+# 当Haystack检测到Mysql数据库添加、修改、删除数据时，自动生成新的索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+# Haystack设置分页器每页显示记录数量，不指定默认仅一页显示所有
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
+
+# 支付宝支付SDK配置参数
+ALIPAY_APPID = '2021000117670985'
+ALIPAY_DEBUG = True
+ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
+ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'                    # 同步回调地址
+NOTIFY_URL = 'http://127.0.0.1:8000/payment/status/'                                 # 异步回调地址
+
+# 定时器
+CRONJOBS = [
+    # 每1分钟生成一次首页静态文件
+    ('*/1 * * * *', 'contents.cron.generate_static_index_html', '>> ' + os.path.join(os.path.dirname(BASE_DIR), 'logs/crontab.log')),
+
+]
+# 指定中文编码格式：若不指定出现非英文字符，会出现字符异常
+CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
