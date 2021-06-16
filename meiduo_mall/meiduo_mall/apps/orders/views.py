@@ -21,6 +21,7 @@ logger = logging.getLogger('django')
 # b = timezone.now()        # 格林尼治时间 2021-06-08 16:08:43.107134+00:00
 
 
+# 结算订单是从Redis购物车中查询出被勾选的商品信息进行结算并展示
 class OrderSettlementView(LoginRequiredMixin, View):
     # 提供订单结算页面
     def get(self, request):
@@ -29,17 +30,17 @@ class OrderSettlementView(LoginRequiredMixin, View):
         try:
             addresses = Address.objects.filter(user=user, is_deleted=False)
         except Address.DoesNotExist:
-            # 未查到，则可以去编辑收货地址
+            # 未查到，则用户可以去编辑收货地址
             addresses = None
 
         # 查询购物车中被勾选的商品sku
         redis_conn = get_redis_connection('carts')
-        redis_cart = redis_conn.hgetall('carts_%s' % user.id)          # sku字典 {b'3': b'1'}
-        redis_selected = redis_conn.smembers('selected_%s' % user.id)       # 被勾选商品sku_id集合 {b'3'}
+        redis_cart = redis_conn.hgetall('carts_%s' % user.id)                       # sku字典 {b'3': b'1'}
+        redis_selected = redis_conn.smembers('selected_%s' % user.id)               # 被勾选商品sku_id集合 {b'3'}
 
-        # 构造购物车中被勾选的sku数据
+        # 构造购物车中被勾选的sku数据：{'sku_id': count,}
         new_cart_dict = {}
-        for sku_id in redis_selected:          # redis集合中取出的元素sku_id是bytes类型，第二个sku_id无需转int，因为集合循环的sku_id与字典的key都是bytes类型
+        for sku_id in redis_selected:                     # redis集合中取出的元素sku_id是bytes类型，第二个sku_id无需转int，因为集合循环的sku_id与字典的key都是bytes类型
             new_cart_dict[int(sku_id)] = int(redis_cart[sku_id])                 # 取出redis_cart字典的value为bytes类型，需转int
 
         # 查询new_cart_dict中所有sku_id对应的sku
@@ -48,17 +49,17 @@ class OrderSettlementView(LoginRequiredMixin, View):
         total_count = 0
         total_amount = Decimal(0.00)
         for sku in skus:
-            # 动态给sku对象添加设置count,amount属性
+            # 动态给sku对象添加设置count, amount属性
             sku.count = new_cart_dict.get(sku.id)
             sku.amount = sku.price * sku.count                 # 单个商品sku的小计金额
 
 
             # 计算所选商品数量，所有商品价格
             total_count += sku.count
-            total_amount += sku.amount          # 注意：price是decimal类型，所以amount也是decima类型，float类型与decimal类型无法直接加
+            total_amount += sku.amount          # 注意：price是decimal类型，所以amount也是decima类型，float类型与decimal类型无法直接加，因此total_amount定义为decimal类型
 
         # 指定邮费
-        # freight = 10.00          # float
+        # freight = 10.00              # float
         freight = Decimal(10.00)
         # decimal是高精度浮点数，拆开存储 如1.22分成1和22存，读取时拼接回来
         # float浮点数不够精确，1.24可能实际存储的是1.2399999999
@@ -79,10 +80,10 @@ class OrderSettlementView(LoginRequiredMixin, View):
 # 接收axios请求提交订单，保存订单基本信息和订单商品信息
 class OrderCommitView(LoginRequiredJSONMixin, View):
     def post(self, request):
-        # 接收参数
+        # 接收参数(订单商品不需接收，后端可查到)
         data = json.loads(request.body.decode())
-        address_id = data.get('address_id')                # 勾选的地址id
-        pay_method = data.get('pay_method')                # 勾选的支付方式
+        address_id = data.get('address_id')                                     # 勾选的地址id
+        pay_method = data.get('pay_method')                                     # 勾选的支付方式，取到的是radio类型input标签中value的值：1(货到付款) 或 2(支付宝支付)
         # 校验参数
         if not all([address_id, pay_method]):
             return http.HttpResponseForbidden('缺少必传参数')
@@ -125,20 +126,21 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
 
                 # 从redis中查询已勾选的sku
                 redis_conn = get_redis_connection('carts')
-                redis_cart = redis_conn.hgetall('carts_%s' % user.id)                       # 返回字典
-                redis_selected = redis_conn.smembers('selected_%s' % user.id)               # 返回集合
+                redis_cart = redis_conn.hgetall('carts_%s' % user.id)                                    # 返回字典
+                redis_selected = redis_conn.smembers('selected_%s' % user.id)                            # 返回集合
                 new_cart_dict = {}
                 for sku_id in redis_selected:
                     new_cart_dict[int(sku_id)] = int(redis_cart.get(sku_id))
 
                 for sku_id in new_cart_dict.keys():
+                    # 对每个商品的下单操作
 
                     # 缩小下面continue范围，意义就是每个商品sku都有多次下单的机会，直至库存不足
                     while True:
                         # 查库获取勾选商品信息(不能有缓存，要查询实时信息)
-                        sku = SKU.objects.get(id=sku_id)            # 查询商品的库存信息时，不能有缓存，不能用filter(id__in=sku_ids)查
+                        sku = SKU.objects.get(id=sku_id)                               # 查询商品的库存信息时，不能有缓存，不能用filter(id__in=sku_ids)查
 
-                        # 获取数据库中原始的库存和销量，后面乐观锁更新库存销量时，以此原始值为条件更新，若因为并发原始值被修改，则更新失败
+                        # 获取数据库中原始的库存和销量，后面乐观锁更新库存销量时，以此原始值为条件去更新，若因为并发原始值被修改过，则更新失败
                         origin_stock =sku.stock
                         origin_sales = sku.sales
 
@@ -238,19 +240,22 @@ class OrderSuccessView(LoginRequiredMixin, View):
 class UserOrderInfoView(LoginRequiredMixin, View):
     # 提供我的订单页面
     def get(self, request, page_num):
-
+        # 当前登录用户
         user = request.user
+
         # 查询该用户的所有订单
         orders = user.orderinfo_set.all().order_by("-create_time")
         # 遍历所有订单
         for order in orders:
             # 绑定订单状态
-            order.status_name = OrderInfo.ORDER_STATUS_CHOICES[order.status-1][1]
+            order.status_name = OrderInfo.ORDER_STATUS_CHOICES[order.status-1][1]                   # status_name获取到订单状态的具体描述
             # 绑定支付方式
             order.pay_method_name = OrderInfo.PAY_METHOD_CHOICES[order.pay_method-1][1]
+
+            # 给订单动态绑定一个属性sku_list，存储订单商品sku
             order.sku_list = []
             # 查询订单商品
-            order_goods = order.skus.all()
+            order_goods = order.skus.all()                                  # OrderGoods模型类外键order指定了related_name=skus
             # 遍历订单商品
             for order_good in order_goods:
                 sku = order_good.sku
@@ -258,7 +263,7 @@ class UserOrderInfoView(LoginRequiredMixin, View):
                 sku.amount = sku.price * sku.count
                 order.sku_list.append(sku)
 
-        # 分页
+        # 分页处理
         page_num = int(page_num)
         try:
             paginator = Paginator(orders, constants.ORDERS_LIST_LIMIT)

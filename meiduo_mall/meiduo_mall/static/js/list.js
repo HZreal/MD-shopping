@@ -15,7 +15,7 @@ let vm = new Vue({
         this.get_carts();
     },
     methods: {
-    	// 获取热销商品数据
+    	// 获取热销商品数据(页面加载完成后才发送请求获取热销商品数据)
         get_hot_skus(){
             if(this.category_id){                                    // category_id存在则发送axios请求
                 let url = '/hot/'+ this.category_id +'/';

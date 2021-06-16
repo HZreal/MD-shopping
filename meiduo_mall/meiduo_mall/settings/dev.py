@@ -56,7 +56,7 @@ ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1',
                  '192.168.0.103',
                  'www.meiduo.site',
-                 'https://www.meiduo.site',
+                 'http://www.meiduo.site',
                  ]
 
 
@@ -87,7 +87,7 @@ INSTALLED_APPS = [
     'django_crontab',                                   # 定时任务
     # 注册子应用
     # 'meiduo_mall.apps.users',                         # 通过工程这个源根(F:\\Django\\meiduo\\meiduo_mall)找到
-    'users',                                            # 所有子应用都定义在包apps中，
+    'users',                                            # 所有子应用都定义在包apps中，必须设置apps为导包路径，否则解释器无法找到users
     # 'users.apps.UsersConfig',
     'contents',                                         # 首页广告模块
     'verifications',                                    # 图形验证码
@@ -184,6 +184,7 @@ DATABASES = {
         'NAME': 'meiduo',
     }
 }
+# 指定数据库读写路由(需开启主从服务器)
 # DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
 
 
@@ -196,7 +197,7 @@ DATABASES = {
 # SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
 # 方式四：设置为redis存储：以后session不再保存在系统django_session表中，而是保存在redis库
 CACHES = {
-    # 默认存储在0号库
+    # 默认存储在0号库(缓存)
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",                    # 去找中间件
         # "LOCATION": "redis://127.0.0.1:6379/0",                      # 网络通信三要素：协议，ip，port
@@ -245,6 +246,7 @@ CACHES = {
 # 以上进行了分库存储操作
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "session"
+# DEFAULT_CACHE_ALIAS = 'default'               # Django默认缓存位置为'default'
 
 
 # Password validation
@@ -274,7 +276,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'zh-Hans'
 
 # 时区
-# TIME_ZONE = 'UTC'    # 格林尼治时间
+# TIME_ZONE = 'UTC'         # 格林尼治时间
 TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
@@ -293,13 +295,12 @@ STATIC_URL = '/static/'
 
 # 告知系统静态文件加载路径，目前开发环境放在工程中，部署上线则放在Nginx代理服务器
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',             # os.path.join(BASE_DIR, 'static')
+    BASE_DIR / 'static',                   # os.path.join(BASE_DIR, 'static')
 ]
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -354,14 +355,14 @@ LOGGING = {
 
 
 # 指定自定义用户模型类，否则迁移等操作会去找系统的auth.User模型类
-AUTH_USER_MODEL = 'users.User'                             # 语法： 子应用名.模型类名
+AUTH_USER_MODEL = 'users.User'
 
 # 指定自定义认证后端
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
 
-# 判断用户是否是登录，指定登录后重定向的地址
+# 表示当判断用户未登入时，重定向到LOGIN_URL指定的路由，即重定向到登录页面
 LOGIN_URL = '/login/'
-# redirect_field_name = REDIRECT_FIELD_NAME = 'next'         # 默认是next
+# redirect_field_name = REDIRECT_FIELD_NAME = 'next'         # 默认是next，表示用户登录完成重定向到原来的访问地址
 
 # QQ登录的配置参数
 QQ_CLIENT_ID = '101518219'
@@ -383,10 +384,10 @@ EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
 
 # 指定自定义的Django文件存储类
 DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
-
 # FastDFS服务器路由
 FDFS_BASE_URL = 'http://192.168.94.131:8888/'
-# http://image.meiduo.site:
+
+
 # Haystack配置
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -405,7 +406,7 @@ ALIPAY_APPID = '2021000117670985'
 ALIPAY_DEBUG = True
 ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
 ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'                    # 同步回调地址
-NOTIFY_URL = 'http://127.0.0.1:8000/payment/status/'                                 # 异步回调地址
+# NOTIFY_URL = 'http://127.0.0.1:8000/payment/status/'                                 # 异步回调地址
 
 # 定时器
 CRONJOBS = [

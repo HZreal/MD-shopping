@@ -11,14 +11,16 @@ from ronglian_sms_sdk import SmsSDK
 #     resp = sdk.sendMessage(tid, mobile, datas)
 #     print(resp)
 
-# 官方函数实例：
-# accId = '8a216da87955ba1901796a40d5d50975'
-# accToken = '6bc212ea08c5413c84e9c3513f24f5ca'
-# appId = '8a216da87955ba1901796a40d6d7097c'
 
-accId = '8a216da87955ba1901796fa1d38a0a80'
-accToken = '86ddfadc98054ac4b2eab2a911d78e4a'
-appId = '8a216da87955ba1901796fa1d4940a86'
+accId = '8a216da87955ba1901796a40d5d50975'
+accToken = '6bc212ea08c5413c84e9c3513f24f5ca'
+appId = '8a216da87955ba1901796a40d6d7097c'
+
+# accId = '8a216da87955ba1901796fa1d38a0a80'
+# accToken = '86ddfadc98054ac4b2eab2a911d78e4a'
+# appId = '8a216da87955ba1901796fa1d4940a86'
+
+# 官方函数实例：
 # def send_message():
 #     sdk = SmsSDK(accId, accToken, appId)
 #     tid = '1'

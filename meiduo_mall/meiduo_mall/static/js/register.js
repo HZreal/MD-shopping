@@ -35,7 +35,7 @@ let vm = new Vue({
         error_name_message: '',
         error_mobile_message: '',
         error_image_code_message: '',
-        error_sms_code_mesaage: '',
+        error_sms_code_message: '',
 
         // flag标记标签
         sending_flag: false,
@@ -55,8 +55,8 @@ let vm = new Vue({
         // 生成图形验证码，封装成函数易复用，方便页面加载完成时调用，点击时也调用
         // 这里实际是vue调用commen.js生成uuid给img标签的src属性赋值，然后自动发送请求到后端，让后端生成验证码并返回
         generate_image_code(){
-            this.uuid = generateUUID();                             // uuid 作为此未登录用户的唯一标识！！！
-            this.image_code_url = '/image_codes/' + this.uuid + '/';                // img标签的src属性一被赋予链接地址就会自动发送请求，无需手动发送
+            this.uuid = generateUUID();                                             // uuid 作为此未登录用户的唯一标识！！！标识图形验证码
+            this.image_code_url = '/image_codes/' + this.uuid + '/';                // img标签的src属性一被赋予链接地址就会自动请求图片数据
         },
 
         // 校验用户名
@@ -174,7 +174,7 @@ let vm = new Vue({
             }
             this.sending_flag = true;           // 关闭标记锁
 
-            // 校验参数
+            // 校验手机号格式，图形验证码格式
             this.check_mobile();
             this.check_image_code();
             if(this.error_mobile == true || this.error_image_code == true){
@@ -197,24 +197,24 @@ let vm = new Vue({
                             // 还原a标签默认提示信息
                             this.sms_code_tip = '获取短信验证码';
                             this.generate_image_code();                     // 重新生成图形验证码
-                            this.sending_flag = false;                      // 开锁
+                            this.sending_flag = false;                      // 关锁，用户可以点击获取图形验证码了
                         }
                         else {
                             console.log(1)                                  // 可以看到console一直在每隔一秒就输出一次1
                             num -= 1;
                             this.sms_code_tip = num + '秒';
-                            // this.error_sms_code_mesaage = response.data.error_mesaage;        // 无需提示用户发送成功
+                            // this.error_sms_code_message = response.data.error_message;        // 无需提示用户发送成功
                             // this.error_sms_code = true;
                         }
                     }, 1000);                                   // 延迟时间timeout是毫秒
                 }
                 else{
-                    if(response.data.code == '4001'){                    // 错误码4001，错误信息error_mesaage有两种：失效或者输入有误
-                        this.error_image_code_message = response.data.error_mesaage;
+                    if(response.data.code == '4001'){                    // 错误码4001，错误信息error_message有两种：失效或者输入有误
+                        this.error_image_code_message = response.data.error_message;
                         this.error_image_code = true;
                     }
                     else {                                              // 错误码4002 短信验证码发送过于频繁
-                        this.error_sms_code_mesaage = response.data.error_mesaage;
+                        this.error_sms_code_message = response.data.error_message;
                         this.error_sms_code = true;
                     }
                     this.generate_image_code();                         // 刷新图形验证码
@@ -247,7 +247,7 @@ let vm = new Vue({
             this.check_mobile();
             this.check_allow();
             this.check_sms_code();
-            // 判断只要有一个错误，则拒绝提交
+            // 判断只要有一个错误，则禁止此次提交的请求
             if(this.error_name == true || this.error_password == true || this.error_password2 == true || this.error_mobile == true || this.error_allow == true || this.error_sms_code == true){
                 window.event.returnValue = false;
             }

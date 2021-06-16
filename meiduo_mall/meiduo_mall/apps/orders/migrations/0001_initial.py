@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('goods', '0003_alter_goodsvisitcount_id'),
         ('users', '0003_auto_20210525_1604'),
     ]
 

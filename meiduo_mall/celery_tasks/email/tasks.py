@@ -7,7 +7,7 @@ logger = logging.getLogger('django')
 
 
 # 定义发送验证邮件的任务
-# bind保证任务对象作为第一个参数self传入
+# bind保证任务对象作为第一个参数self传入，因为调用时传的参数是位置参数email, verify_email_url
 # retry_backoff指发送异常自动重试的次数，第n次重试时间间隔为：retry_backoff * 2^(n-1)秒，即第一次重试间隔2s，第二次间隔2s，第三次间隔4s
 # max_retries指重试的上限次数
 @celery_app.task(bind=True, name='send_verify_email', retry_backoff=3)

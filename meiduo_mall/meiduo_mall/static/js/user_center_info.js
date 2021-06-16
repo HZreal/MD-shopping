@@ -58,19 +58,19 @@ let vm = new Vue({
                         'X-CSRFToken':getCookie('csrftoken')
                     },
                     responseType: 'json'
-                })
-                    .then(response => {
+                }).then(response => {
                         if (response.data.code == '0') {
                             this.set_email = false;
                             this.send_email_btn_disabled = true;
                             this.send_email_tip = '已发送验证邮件';
-                        } else if (response.data.code == '4101') {                      // 检测到此次请求是用户未登入的请求
+                        }
+                        else if (response.data.code == '4101') {                      // 检测到此次请求是用户未登入的请求
                             location.href = '/login/?next=/info/';
-                        } else {
+                        }
+                        else {
                             console.log(response.data.errmsg);
                         }
-                    })
-                    .catch(error => {
+                    }).catch(error => {
                         console.log(error.response);
                     });
             }

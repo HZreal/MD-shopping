@@ -18,7 +18,7 @@ app_private_key_string = open(app_private_key_path).read()
 alipay_public_key_string = open(alipay_public_key_path).read()
 
 
-# 对接支付宝的支付接口
+# 对接支付宝的支付接口：将支付宝扫码登录链接发给前端
 class PaymentView(LoginRequiredJSONMixin, View):
     def get(self, request, order_id):
         # 校验参数order_id
@@ -49,7 +49,7 @@ class PaymentView(LoginRequiredJSONMixin, View):
         order_string = alipay.api_alipay_trade_page_pay(
             out_trade_no=order_id,                                         # 订单编号，必传
             total_amount=str(order.total_amount),                          # 订单金额，decimal转str
-            subject="md_market_%s" % order_id,                             # 订单标题
+            subject='md_market_%s' % order_id,                             # 订单标题
             return_url=settings.ALIPAY_RETURN_URL,                         # 同步通知的回调地址
             notify_url=None                                                # 异步通知的回调地址
         )
@@ -72,7 +72,8 @@ class PaymentStatusView(View):
         # 参数转成标准字典类型
         data = query_dict.dict()
         # 参数中移除sign并提取其余参数进行签名验证
-        signature = data.pop('sign')
+        signature = data.pop('sign')                            # 字典的pop方法
+
         # 使用SDK对象，调用验证通知接口函数进行验证
         alipay = AliPay(
             appid=settings.ALIPAY_APPID,
@@ -82,7 +83,7 @@ class PaymentStatusView(View):
             sign_type='RSA2',
             debug=settings.ALIPAY_DEBUG,
         )
-        success = alipay.verify(data, signature)           # 返回bool类型
+        success = alipay.verify(data, signature)           # 返回bool类型，验证成功返回True
         # 验证通过后对支付状态进行处理(保存订单编号和交易编号，修改订单状态)
         if not success:
             # 验证失败则拒绝此次请求
@@ -92,7 +93,7 @@ class PaymentStatusView(View):
             order_id = data.get('out_trade_no')
             trade_id = data.get('trade_no')
             Payment.objects.create(
-                # order='',                                           # 无法直接拿到订单对象(需查库)用字段代替
+                # order='',                                           # 无法直接拿到订单对象，调用模型类用字段代替存储
                 order_id=order_id,
                 trade_id=trade_id,
             )

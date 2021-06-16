@@ -7,7 +7,7 @@ def get_categories():
 
     # 构造商品分类字典(作为模板数据传入前端显示)
     # categories = {}                       # 无序的
-    categories = OrderedDict()  # 创建有序字典
+    categories = OrderedDict()              # 创建有序字典
 
     # 查询商品频道(37个) 按照组id、sequence排序
     channels = GoodsChannel.objects.order_by('group_id', 'sequence')

@@ -13,9 +13,7 @@ def merge_cart_cookies_redis(request, user, response):
         return response
 
     # 购物车数据存在则反序列化获取，合并
-    cookie_cart_str_bytes = cart_str.encode()
-    cookie_cart_dict_bytes = base64.b64decode(cookie_cart_str_bytes)
-    cookie_cart_dict = pickle.loads(cookie_cart_dict_bytes)
+    cookie_cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
 
     '''
     cart_dict = {                # 未登录用户购物车数据结构
@@ -43,7 +41,7 @@ def merge_cart_cookies_redis(request, user, response):
     # 根据新的数据结构，合并到redis
     redis_conn = get_redis_connection('carts')
     pl = redis_conn.pipeline()
-    pl.hmset('carts_%s' % user.id, new_cart_dict)         # hmset一次性设置多个域和值，传入参数的是字典
+    pl.hmset('carts_%s' % user.id, new_cart_dict)         # hmset一次性设置key下的多个域和值，传入参数的是字典
     if new_selected_add:    # 有值则操作
         pl.sadd('selected_%s' % user.id, *new_selected_add)
     if new_selected_rem:

@@ -139,7 +139,7 @@
 {#                       点击某个选项，则映射其sku_id，发送请求获取点击的sku信息              #}
                         {% elif option.sku_id %}
                             <a href="{{ url('goods:detail', args=(option.sku_id, )) }}">{{ option.value }}</a>
-
+{#                      sku_id有可能不存在，比如sku有2个规格，对应spu有3个规格，那么第三个规格的选项对象是没有sku_id属性的           #}
                         {% else %}
                             <a href="javascript:;">{{ option.value }}</a>
                         {% endif %}
@@ -208,9 +208,24 @@
 							<div class="stars_five"></div>
 							<div class="judge_detail">派送非常快，第二天上午就收到。2天使用初步总结，前一部手机也是华为P9plus.MATE10pro包装原封未拆精致大气。拆开后第一眼就看到宝石蓝的手机，非常惊艳；然后就是配件一应俱全。开机各方面设置，把通讯录、短信等同步好，同品牌手机同步很快。和P9plus一样的后置指纹识别很方便。录制指纹容易，解锁非常快，秒开！屏幕完好，默认分辨率显示效果很好。</div>
 						</div>
-					</li>			
+					</li>
+{#                    <li class="judge_list fl" v-for="comment in comments">#}
+{#                        <div class="user_info fl">#}
+{#                            <b>[[comment.username]]</b>#}
+{#                        </div>#}
+{#                        <div class="judge_info fl">#}
+{#                            <div :class="comment.score_class"></div>#}
+{#                            <div class="judge_detail">[[comment.comment]]</div>#}
+{#                        </div>#}
+{#                    </li>#}
 				</ul>
 			</div>
+{#            <li @click="on_tab_content('comment')" :class="tab_content.comment?'active':''">商品评价([[ comments.length ]])</li>#}
+{#            <div class="price_bar">#}
+{#                <span class="show_pirce">¥<em>{{ sku.price }}</em></span>#}
+{#                <a href="javascript:;" class="goods_judge">[[ comments.length ]]人评价</a>#}
+{#            </div>#}
+
 		</div>
 	</div>
 	<div class="footer">

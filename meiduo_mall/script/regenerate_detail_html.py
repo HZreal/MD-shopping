@@ -7,7 +7,7 @@
 
 
 
-# 先使用方案一来静态详情页。当有运营人员参与时才会补充方案二
+# 先使用方案一来静态详情页。当有运营人员修改时才会补充方案二
 
 # 脚本执行的解释器    # /usr/bin/env python(linux)
 #!F:\virtualenvs\py3_django_1\Scripts\python.exe
@@ -44,8 +44,8 @@ def generate_static_sku_detail_html(sku_id):
     breadcrumb = get_breadcrumb(sku.category)
 
     # 构建当前sku的规格键
-    sku_specs = sku.specs.order_by('spec_id')       # sku_specs即是当前sku拥有的规格对象集
-    sku_key = [spec.option.id for spec in sku_specs]        # sku_key即是当前sku拥有的规格的id组成的列表
+    sku_specs = sku.specs.order_by('spec_id')
+    sku_key = [spec.option.id for spec in sku_specs]
 
     # 获取当前商品sku所在spu类下的所有SKU
     skus = sku.spu.sku_set.all()
@@ -64,19 +64,15 @@ def generate_static_sku_detail_html(sku_id):
         # 若当前sku的规格信息不完整，则不再继续(当前sku的规格条数不能小于当前sku所在spu类所拥有的规格条数)
         if len(sku_key) < len(goods_specs):
             return
-        for index, spec in enumerate(
-                goods_specs):  # enumerate()函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据下标(默认从0开始，亦可start指定)和数据，一般用在 for 循环当中
-            # 复制当前sku的规格键(切片不指定开始和结尾索引即保留所有，也就是复制)
+        for index, spec in enumerate(goods_specs):
             key = sku_key[:]
-            # 该spu规格拥有的选项
-            spec_options = spec.options.all()  # spec_options即某个spu规格的选项对象集
+            spec_options = spec.options.all()
             for option in spec_options:
-                # 在规格选项sku字典中查找符合当前规格的sku
                 key[index] = option.id
                 option.sku_id = spec_sku_map.get(tuple(key))
             spec.spec_options = spec_options
 
-        # 上下文
+
         context = {
             'categories': categories,
             'breadcrumb': breadcrumb,

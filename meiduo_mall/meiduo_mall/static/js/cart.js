@@ -3,11 +3,11 @@ let vm = new Vue({
     delimiters: ['[[', ']]'],
     data: {
         username: getCookie('username'),
-        carts: carts,
+        carts: carts,                    // 接收后端传的购物车数据cart_skus
         total_count: 0,
         total_selected_count: 0,
         total_selected_amount: 0,
-        carts_tmp: [],
+        carts_tmp: [],                  // carts的备份，即用户修改了但后端修改失败，则可还原为用户修改前的数据状态
     },
     computed: {
         selected_all(){
@@ -79,14 +79,15 @@ let vm = new Vue({
             let count = 1;
             if (this.carts[index].count < 5) {
                 count = this.carts[index].count + 1;
-            } else {
+            }
+            else {
                 count = 5;
                 alert('超过商品数量上限');
             }
             // this.carts[index].count = count; // 本地测试
             this.update_count(index, count); // 请求服务器
         },
-        // 数量输入框输入操作
+        // 数量输入框输入操作(失去焦点)
         on_input(index){
             let count = parseInt(this.carts[index].count);
             if (isNaN(count) || count <= 0) {
@@ -95,9 +96,10 @@ let vm = new Vue({
                 count = 5;
                 alert('超过商品数量上限');
             }
+            // 格式校验通过则调用update_count
             this.update_count(index, count); // 请求服务器
         },
-        // 更新购物车
+        // 更新当前修改sku的数量count
         update_count(index, count){
             let url = '/carts/';
             axios.put(url, {
@@ -112,8 +114,8 @@ let vm = new Vue({
                 withCredentials: true
             }).then(response => {
                     if (response.data.code == '0') {
-                        // this.carts[index].count = response.data.cart_sku.count; // 无法触发页面更新
-                        Vue.set(this.carts, index, response.data.cart_sku); // 触发页面更新
+                        // this.carts[index].count = response.data.cart_sku.count;            // 无法触发页面更新
+                        Vue.set(this.carts, index, response.data.cart_sku);                   // 触发页面更新
                         // 重新计算界面的价格和数量
                         this.compute_total_selected_amount_count();
                         this.compute_total_count();
@@ -123,14 +125,14 @@ let vm = new Vue({
                     }
                     else {
                         alert(response.data.errmsg);
-                        this.carts[index].count = this.carts_tmp[index].count;
+                        this.carts[index].count = this.carts_tmp[index].count;                    // 还原到用户修改前的数据状态
                     }
                 }).catch(error => {
                     console.log(error.response);
-                    this.carts[index].count = this.carts_tmp[index].count;
+                    this.carts[index].count = this.carts_tmp[index].count;                        // 还原到用户修改前的数据状态
                 })
         },
-        // 更新购物车选中数据
+        // 更新购物车选中数据(检测到用户勾选变化)
         update_selected(index){
             let url = '/carts/';
             axios.put(url, {
@@ -144,18 +146,18 @@ let vm = new Vue({
                 responseType: 'json',
                 withCredentials: true
             }).then(response => {
-                    if (response.data.code == '0') {
-                        this.carts[index].selected = response.data.cart_sku.selected;
-                        // 重新计算界面的价格和数量
-                        this.compute_total_selected_amount_count();
-                        this.compute_total_count();
-                    }
-                    else {
-                        alert(response.data.errmsg);
-                    }
-                }).catch(error => {
-                    console.log(error.response);
-                })
+                if (response.data.code == '0') {
+                    this.carts[index].selected = response.data.cart_sku.selected;
+                    // 重新计算界面的价格和数量
+                    this.compute_total_selected_amount_count();
+                    this.compute_total_count();
+                }
+                else {
+                    alert(response.data.errmsg);
+                }
+            }).catch(error => {
+                console.log(error.response);
+            })
         },
         // 删除购物车数据
         on_delete(index){
@@ -183,7 +185,7 @@ let vm = new Vue({
                     console.log(error.response);
                 })
         },
-        // 购物车全选
+        // 检测用户修改购物车是否全选
         on_selected_all(){
             let selected = !this.selected_all;
             let url = '/carts/selection/';
@@ -198,7 +200,7 @@ let vm = new Vue({
             }).then(response => {
                     if (response.data.code == '0') {
                         for (let i=0; i<this.carts.length;i++){
-                            this.carts[i].selected = selected;
+                            this.carts[i].selected = selected;                // 循环将数组carts每个sku对象的selected设为True
                         }
                         // 重新计算界面的价格和数量
                         this.compute_total_selected_amount_count();

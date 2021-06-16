@@ -66,13 +66,10 @@
 		<li class="col01"><input type="checkbox" name="selected" v-model="cart_sku.selected" @change="update_selected(index)"></li>
 		<li class="col02"><img :src="cart_sku.default_image_url"></li>
 		<li class="col03">[[ cart_sku.name ]]</li>
-		<li class="col04">台</li>
+{#		<li class="col04">台</li>     #}
 		<li class="col05">[[ cart_sku.price ]]元</li>
 		<li class="col06">
 			<div class="num_add">
-{#				<a href="javascript:;" class="add fl">+</a>#}
-{#				<input type="text" class="num_show fl" value="1" autocomplete="off">#}
-{#				<a href="javascript:;" class="minus fl">-</a>	#}
                 <a @click="on_minus(index)" class="minus fl">-</a>
 				<input v-model="cart_sku.count" @blur="on_input(index)" type="text" class="num_show fl">
 				<a @click="on_add(index)" class="add fl">+</a>

@@ -1,20 +1,28 @@
 # celery程序入口
+# Celery是Python开发的分布式任务调度模块，支持的消息服务有RabbitMQ、Redis等数据库
+# celery通过消息进行通信，通常使用一个叫Broker(中间人)来协助client(任务的发出者)和worker(任务的处理者). clients发送消息到队列中，broker将队列中的信息派发给worker来处理
+# Celery需要一种解决消息的发送和接受的方式，我们把这种用来存储消息的的中间装置叫做message broker, 也可叫做消息中间人，比如RabbitMQ， redis等
+# RabbitMQ是一个功能完备，稳定的并且易于安装的broker. 它是生产环境中最优的选择
+# Redis也是一款功能完备的broker可选项，但是其更可能因意外中断或者电源故障导致数据丢失的情况，开发可用
+
 from celery import Celery
 import os
 
 
-# 为celery使用django配置文件进行设置：celery进程与Django进程互相独立，celery进程无法直接读取到Django的配置文件setting
+# 发邮件时，为celery使用django配置文件而设置：celery进程与Django进程互相独立，celery进程无法直接读取到Django的配置文件settings
 if not os.getenv('DJANGO_SETTINGS_MODULE'):
     os.environ['DJANGO_SETTINGS_MODULE'] = 'meiduo_mall.settings.dev'
 
-# 创建Celery实例对象,内部封装了执行任务的装饰器task(self, *args, **opts)
-celery_app = Celery('celery_instance')      # celery_instance用来标识这个实例，可不传，
 
-# 加载配置
+# 创建Celery实例对象,即创建一个celery应用。内部封装了执行任务的装饰器task(self, *args, **opts)
+celery_app = Celery('celery_instance')             # celery_instance用来标识这个实例，可不传，
+
+# 加载配置：指定broker为redis
 celery_app.config_from_object('celery_tasks.config')
 
 # 注册任务：autodiscover_tasks的参数是一个列表
 celery_app.autodiscover_tasks(['celery_tasks.sms', 'celery_tasks.email'])
+
 
 
 
@@ -30,7 +38,7 @@ celery_app.autodiscover_tasks(['celery_tasks.sms', 'celery_tasks.email'])
         # 在协程中尽量不要调用阻塞IO的方法，比如打印，读取文件，Socket接口等，除非改为异步调用的方式，并且协程只有在IO密集型的任务中才会发挥作用
 
 
-# 消息队列是消息在传输的过程中保存消息的容器,现在主流消息队列有：RabbitMQ、ActiveMQ、Kafka等等
+# 消息队列是消息在传输的过程中保存消息的容器,现在主流消息队列有：RabbitMQ、ActiveMQ、Kafka等
 # TODO rabbitMQ
 
 

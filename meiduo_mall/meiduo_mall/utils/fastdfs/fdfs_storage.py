@@ -6,7 +6,7 @@ from django.conf import settings
 # (官方文档)自定义文件存储类时必须重写 _open()和 _save() 方法 其他方法根据需求重写
 class FastDFSStorage(Storage):
 
-    # 文件存储类的初始化方法：接收外界参数
+    # 文件存储类的初始化方法：option提供给外界传参的接口
     # def __init__(self, option=None):
     #     if not option:
     #         option = settings.CUSTOM_STORAGE_OPTIONS

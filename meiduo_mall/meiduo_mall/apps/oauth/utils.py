@@ -13,7 +13,9 @@ def generate_access_token(openid):
     s = Serializer(settings.SECRET_KEY, constants.ACCESS_TOKEN_EXPIRES)
 
     # 准备待序列化的字典数据
-    data = {'openid': openid}
+    data = {
+        'openid': openid
+    }
 
     # 调用dumps方法进行序列化，返回类型是byte
     token = s.dumps(data)

@@ -15,8 +15,8 @@ urlpatterns = [
     # 统计三级类别对应商品的访问量
     re_path(r'detail/visit/(?P<category_id>\d+)/$', views.DetailVisitView.as_view()),
 
-
-
+    # 获取商品评价信息
+    re_path(r'comments/(?P<sku_id>\d+)/', views.GoodsCommentView.as_view()),
 
 ]
 

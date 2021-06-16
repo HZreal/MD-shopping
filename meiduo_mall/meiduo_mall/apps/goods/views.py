@@ -37,7 +37,7 @@ class ListView(View):
         # 获取商品分类数据(调用即可)
         categories = get_categories()
 
-        # 获取面包屑导航(传入的是三级分类)
+        # 获取面包屑导航(这里传入的是三级分类)
         breadcrumb = get_breadcrumb(category)
 
         # 分页和排序查询，条件：当前三级分类下的所有sku，且已上架，查询结果按sort_field排序
@@ -62,7 +62,7 @@ class ListView(View):
             'total_page': total_page,                                    # 总共的页数
             'page_num': page_num,                                        # 当前页码
             'sort': sort,                                                # 前端依据sort设置当前用户选中a标签(默认/价格/人气)的样式，且分页器也需要此参数
-            'category_id': category_id,
+            'category_id': category_id,                                  # 通过jinja2模板传给vue，然后发送获取热销商品的请求
         }
         return render(request, 'list.html', context)
 
@@ -111,8 +111,7 @@ class DetailView(View):
         #     sku_key.append(spec.option.id)
         sku_key = [spec.option.id for spec in sku_specs]                # [8, 12]
 
-
-        # 2.获取当前商品sku所在spu类下的所有SKU
+        # 2.获取当前商品sku所在spu类下的所有SKU(步骤2构造数据是为步骤4服务的)
         skus = sku.spu.sku_set.all()                                   # [sku3, sku4, sku5, sku6, sku7, sku8]
         # 构建不同规格选项的sku字典
         spec_sku_map = {}
@@ -131,7 +130,6 @@ class DetailView(View):
         #      ...
         #     (10, 12): 8,
         # }
-
 
         # 3.获取当前sku所在spu类拥有的规格信息(goods_specs即spu规格对象集)
         goods_specs = sku.spu.specs.order_by('id')                  # [颜色(id=4), 内存(id=5)]
@@ -156,7 +154,6 @@ class DetailView(View):
         #    ...
         # ]
 
-
         # 4.用于前端用户点击某规格选项时，立即映射sku_id发给后端，即给选项对象绑定sku_id
         # enumerate()函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据下标(默认从0开始，亦可start指定)和数据，一般用在 for 循环当中
         for index, spec in enumerate(goods_specs):                            # goods_specs为[颜色(id=4), 内存(id=5)]
@@ -179,8 +176,8 @@ class DetailView(View):
         context = {
             'categories': categories,
             'breadcrumb': breadcrumb,
-            'sku': sku,                                # 传入当前sku对象给前端特别样式处理：高亮展示
-            'specs': goods_specs,                      # 页面渲染需要当前sku所在spu类下的所有规格选项
+            'sku': sku,                                            # 传入当前sku对象给前端特别样式处理：高亮展示
+            'specs': goods_specs,                                  # 页面渲染需要当前sku所在spu类下的所有规格选项
         }
         return render(request, 'detail.html', context)
 
@@ -225,9 +222,13 @@ class DetailVisitView(View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
 
 
+# 获取商品评价信息
+class GoodsCommentView(View):
+    def get(self, request):
 
 
 
+        return http.JsonResponse({})
 
 
 

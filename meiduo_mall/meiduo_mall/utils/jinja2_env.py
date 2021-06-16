@@ -15,12 +15,13 @@ def environment(**options):
 
     # TODO 自定义语法：{{ static('静态文件相对路径') }}     {{ url('路由命名空间') }}
     # 将上面这些新的语法定义到环境中
-    env.globals.update({
+    env.globals.update({                              # 读取DEFAULT_NAMESPACE字典并update新语法
         # 'static': staticfiles_storage.url,
-        'static': static,                           # 获取静态文件的前缀
+        'static': static,                             # 获取静态文件的前缀
 
-        # 反向解析传参时，为：url('namespace:name', args=(params1, params2))
-        'url': reverse,                             # 传入命名空间做重定向(反向解析)。在模板里使用url('路由命名空间'),实际就是调用reverse做重定向,比如首页的登录，登出，注册
+        # 传入命名空间做重定向(反向解析)。在模板里使用url('路由命名空间'),实际就是调用reverse做重定向,比如首页的登录，登出，注册
+        # 反向解析传路径参数时，为：url('namespace:name', args=(params1, params2))
+        'url': reverse,
 
     })
 

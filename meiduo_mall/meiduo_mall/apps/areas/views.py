@@ -4,19 +4,19 @@ from areas.models import Area
 from django import http
 from meiduo_mall.utils.response_code import RETCODE
 import logging
-from django.core.cache import cache
+from django.core.cache import cache                # 进入可看到DEFAULT_CACHE_ALIAS = 'default' 即Django默认缓存位置为'default'
 
 
 logger = logging.getLogger('django')
 
-# 接收前端axios请求查询省份数据或者市区数据：省份数据会在页面加载完成就触发请求，而市区数据则由用户操作时请求
+# 接收前端axios请求查询省、市区数据：省份数据会在页面加载完成就触发axios请求，而市区数据则由vue监听用户操作下拉框时发送请求
 class AreasView(View):
     def get(self, request):
         area_id = request.GET.get('area_id')                   # area_id为前端传过来的省市id
         # 判断当前需要查询的是省份数据还是市区数据
         if not area_id:          # 当前需要省级数据
             # 先判断是否有缓存数据
-            province_list = cache.get('province_list')
+            province_list = cache.get('province_list')                    # redis 'default' 0号库
             if not province_list:
                 # 没有缓存数据则查库获取省级数据
                 try:
@@ -26,15 +26,17 @@ class AreasView(View):
                     # for province_model in province_model_list:
                     #     province_dict = {'id': province_model.id, 'name': province_model.name}
                     #     province_list.append(province_dict)
-                    # 列表推导式解决上述循环
+                    # 列表推导式简写
                     province_list = [{'id': province_model.id, 'name': province_model.name} for province_model in province_model_list]
 
                     # 缓存省份字典列表数据到cache：即存储到redis默认的'default'配置中(0号库)
                     cache.set('province_list', province_list, 3600)
+
                 except Exception as e:
                     logger.error(e)
                     return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '查询省份数据错误'})
-            # 响应json数据
+
+            # 响应省份json数据
             return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'province_list': province_list})
 
         else:               # 当前需要市区县级数据
@@ -59,6 +61,7 @@ class AreasView(View):
 
                     # 缓存数据到cache
                     cache.set('sub_area_' + area_id, sub_data, 3600)
+
                 except Exception as e:
                     logger.error(e)
                     return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '城市或区县数据错误'})

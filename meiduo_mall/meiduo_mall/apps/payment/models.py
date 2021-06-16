@@ -5,7 +5,7 @@ from orders.models import OrderInfo
 
 
 
-"""支付信息"""
+"""支付信息模型类"""
 class Payment(BaseModel):
 
     order = models.ForeignKey(OrderInfo, on_delete=models.CASCADE, verbose_name='订单')

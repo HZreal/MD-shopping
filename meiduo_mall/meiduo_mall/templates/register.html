@@ -59,9 +59,11 @@
 							<label>短信验证码:</label>
 							<input type="text" v-model="sms_code" @blur="check_sms_code" name="sms_code" id="msg_code" class="msg_input">
 							<a @click="send_sms_code" class="get_msg_code">[[ sms_code_tip ]]</a>
-							<span class="error_tip" v-show="error_sms_code">[[ error_sms_code_mesaage ]]</span>
-                            {% if sms_error_mesaage %}
-                                <span class="error_tip">{{ sms_error_mesaage }}</span>
+							<span class="error_tip" v-show="error_sms_code">[[ error_sms_code_message ]]</span>
+
+{#                           点击注册时可能有的短信错误信息      #}
+                            {% if sms_error_message %}
+                                <span class="error_tip">{{ sms_error_message }}</span>
                             {% endif %}
 						</li>
 						<li class="agreement">

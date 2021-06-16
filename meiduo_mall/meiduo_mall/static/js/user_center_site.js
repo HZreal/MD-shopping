@@ -28,6 +28,7 @@ let vm = new Vue({
         // 字符串类型的下标索引：当前需要编辑的address对象在addresses数组中的下标index(整型)转成字符串类型
         editing_address_index: '',                                     // editing_address_index = index.toString()
         edit_title_index: '',                                          // 字符串类型的下标索引，与上作用等同
+
         // 接收输入框用户输入的新收货地址标题
         new_title: '',
 
@@ -182,16 +183,15 @@ let vm = new Vue({
             let url = '/areas/';                      // 不携带查询参数area_id
             axios.get(url, {
                 responseType: 'json'
-            })
-                .then(response => {
+            }).then(response => {
                     if (response.data.code == '0') {
                         this.provinces = response.data.province_list;
-                    } else {
+                    }
+                    else{
                         console.log(response.data);
                         this.provinces = [];
                     }
-                })
-                .catch(error => {
+                }).catch(error => {
                     console.log(error.response);
                     this.provinces = [];
                 })
@@ -216,7 +216,7 @@ let vm = new Vue({
                         responseType: 'json'
                     }).then(response => {
                             if (response.data.code == '0') {
-                                // 局部刷新界面：展示所有地址信息，将新的地址添加到头部
+                                // 局部刷新界面：展示所有地址信息，获取后端传的用户新增的地址，将新增地址添加到地址对象数组索引index=0处
                                 this.addresses.splice(0, 0, response.data.address);
                                 this.is_show_edit = false;
                             }
@@ -230,28 +230,32 @@ let vm = new Vue({
                             console.log(error.response);
                         })
                 }
-                else {
+                else{
                     // 修改地址
                     let url = '/addresses/' + this.addresses[this.editing_address_index].id + '/';
-                    axios.put(url, this.form_address, {
-                        headers: {
-                            'X-CSRFToken':getCookie('csrftoken')
+                    axios.put(
+                        url,
+                        this.form_address,
+                        {
+                            headers: {
+                                'X-CSRFToken':getCookie('csrftoken')
+                            },
+                            responseType: 'json'
                         },
-                        responseType: 'json'
-                    }).then(response => {
-                            if (response.data.code == '0') {
-                                this.addresses[this.editing_address_index] = response.data.address;
-                                this.is_show_edit = false;
-                            }
-                            else if (response.data.code == '4101') {
-                                location.href = '/login/?next=/addresses/';
-                            }
-                            else {
-                                alert(response.data.errmsg);
-                            }
-                        }).catch(error => {
-                            alert(error.response);
-                        })
+                    ).then(response => {
+                        if (response.data.code == '0') {
+                            this.addresses[this.editing_address_index] = response.data.address;
+                            this.is_show_edit = false;
+                        }
+                        else if (response.data.code == '4101') {
+                            location.href = '/login/?next=/addresses/';
+                        }
+                        else {
+                            alert(response.data.errmsg);
+                        }
+                    }).catch(error => {
+                        alert(error.response);
+                    })
                 }
             }
         },
@@ -310,8 +314,8 @@ let vm = new Vue({
         },
         // 取消保存地址title
         cancel_title(){
-            this.edit_title_index = '';
-            this.new_title = '';
+            this.edit_title_index = '';                // 当前编辑地址的下标索引字符串设空
+            this.new_title = '';                       // 清空用户的输入内容
         },
         // 修改地址title
         save_title(index){

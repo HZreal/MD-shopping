@@ -4,11 +4,11 @@ let vm = new Vue({
     data: {
         username: getCookie('username'),
         hot_skus: [],
-        category_id: category_id,
-		sku_id: sku_id,
-        sku_price: sku_price,                   // 商品单价
+        category_id: category_id,                 // vue 收到category_id会立即发送请求增加此类商品的访问量
+		sku_id: sku_id,                           // vue 收到sku_id会立即发送请求保存用户浏览记录
+        sku_price: sku_price,                     // 商品单价
         sku_count: 1,
-        sku_amount: 0,                          // 总价
+        sku_amount: 0,                            // 总价
         tab_content: {
 		    detail: true,
             pack: false,
@@ -52,7 +52,8 @@ let vm = new Vue({
         on_addition(){
             if (this.sku_count < 5) {
                 this.sku_count++;
-            } else {
+            }
+            else {
                 this.sku_count = 5;
                 alert('超过商品数量上限');
             }
@@ -174,6 +175,7 @@ let vm = new Vue({
                     console.log(error.response);
                 })
         },
+
         // 获取商品评价信息
         get_goods_comment(){
             if (this.sku_id) {

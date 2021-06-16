@@ -15,6 +15,7 @@ class IndexView(View):
 
         # 2.查询首页广告数据
         content_categories = ContentCategory.objects.all()               # 查广告类别(19条记录)
+
         # 构造有序字典数据
         contents = OrderedDict()
         for content_category in content_categories:
@@ -26,7 +27,6 @@ class IndexView(View):
             'categories': categories,
             'contents': contents,
         }
-
         # render封装了获取模板文件、渲染模板文件、将html字符串作为响应体发送给浏览器解析
         return render(request, 'index.html', context)
 

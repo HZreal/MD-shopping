@@ -71,13 +71,16 @@
                     <li><span>联系方式：</span>[[ mobile ]]</li>
                     <li>
                         <span>Email：</span>
+                        {#     set_email的值是每次加载页面都会被赋予的，取决于email是否为空，即用户是否保存过邮箱(是否入库)   #}
                         <div v-if="set_email">
-                            {#  set_email的值是每次加载页面都会被赋予的，取决于email是否为空，即用户是否保存过邮箱(是否入库)  #}
+                            {#     这里是没有邮箱的显示    #}
                             <input v-model="email" @blur="check_email" type="email" name="email" class="email">
                             <input @click="save_email" type="button" name="" value="保 存">
                             <input @click="cancel_email" type="reset" name="" value="取 消">
                             <div v-show="error_email" class="error_email_tip">邮箱格式错误</div>
                         </div>
+
+                        {#    这里是保存过邮箱的显示    #}
                         <div v-else>
                             <input v-model="email" type="email" name="email" class="email" readonly>
                             <div v-if="email_active">

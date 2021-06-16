@@ -21,32 +21,33 @@ _softVersion = '2013-12-26'                                                  # �
 #     print(result)
 
 
-# 单例模式：目的是确保某一个类只有一个实例存在
-# 单例模式保证了在程序的不同位置都可以且仅可以取到同一个对象实例：如果实例不存在，会创建一个实例；如果已存在就会返回这个实例
-# 类创建实例对象并赋给类的属性_instace中，没有_instance动态创建
-class CCP(object):           # 单例类
+# 单例模式：目的是确保某一个类只有一个实例存在，保证了在程序的不同位置都可以且仅可以取到同一个对象实例
+# 一个类初始化时，判断实例不存在，会创建一个实例；如果已存在就会返回这个实例，这样的类称为单例类
+class CCP(object):               # 单例类
     # 单例的初始化方法
-    def __new__(cls, *args, **kwargs):                 # 会在__init__之前调用
+    def __new__(cls, *args, **kwargs):                     # 无需使用@staticmethod装饰器修饰，会在__init__之前调用
 
+        # 类创建实例时判断实例是否存在，存在则不创建实例直接返回该实例
         if not hasattr(cls, '_instance'):
-            # 单例不存在则实例化创建单例cls._instance，super()保证了不会调用此处的__new__()，而是基类的
+            # 不存在则创建CCP实例并保存在类属性cls._instance中，super()保证了不会调用此处的__new__()，而是基类的
             cls._instance = super(CCP, cls).__new__(cls, *args, **kwargs)
 
             # 初始化SDK，创建了一个REST对象，
-            # 并保存在单例的属性中(单例cls._instance原本没有rest这个属性，动态新建)，便于调用单例类的属性rest就可以调用到REST对象
+            # 并保存在此类CCP的类属性中(CCP类原本没有rest这个属性，动态新建)，便于调用单例类的类属性rest就可以调用到REST对象
             rest = REST(_serverIP, _serverPort, _softVersion)
             cls._instance.rest = rest
 
-            # 调用单例的属性cls._instance.rest即是调用REST对象
+            # 调用单例类的类属性cls._instance.rest即是调用REST对象
             cls._instance.rest.setAccount(_accountSid, _accountToken)
             cls._instance.rest.setAppId(_appId)
 
-        return cls._instance     # 返回单例
+        # 实例存在或者刚创建实例完成，直接返回该实例
+        return cls._instance
 
     # 定义实例对象方法(不是类方法，是类方法就失去单例的意义) 实现单例类发送短信验证码
     def send_template_sms(self, to, datas, tempId):
         result = self.rest.sendTemplateSMS(to, datas, tempId)           # 发短信有延迟
-        print(result)      # dict类型
+        print(result)          # dict类型
         if result.get('statusCode') == '000000':
             return 0
         else:
