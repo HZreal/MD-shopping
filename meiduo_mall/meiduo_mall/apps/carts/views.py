@@ -41,7 +41,7 @@ class CartsView(View):
         if user.is_authenticated:              # 已登录返回True，操作redis购物车
             redis_conn = get_redis_connection('carts')
             pl = redis_conn.pipeline()
-            # 数据sku_id, count用harh类型存储
+            # 数据sku_id, count用harsh类型存储
             # 查询key记录，sku_id存在则原count与当前所传count相加，不存在则count为当前所传值，hincrby方法已封装此逻辑，直接调用
             pl.hincrby('carts_%s' % user.id, sku_id, count)
             # 勾选状态selected用set类型存储
@@ -79,7 +79,7 @@ class CartsView(View):
                 origin_count = cart_dict[sku_id]['count']
                 count += origin_count
 
-            # 无论sku存在只需修改count,sekected，还是不存在需要添加新数据sku_id,count,selected到购物车，都可以统一化处理为：重写购物车字典数据
+            # 无论sku存在只需修改count, selected，还是不存在需要添加新数据sku_id,count,selected到购物车，都可以统一化处理为：重写购物车字典数据
             cart_dict[sku_id] = {
                 'count': count,
                 'selected': selected,

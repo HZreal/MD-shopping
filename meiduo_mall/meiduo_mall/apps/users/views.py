@@ -173,9 +173,9 @@ class LogoutView(View):
 
 
 # 用户中心：需要验证用户登入才可进入(有多种方式，其他方式写在utils.view里)
-# 方式一：继承父类LoginRequiredMixin
+# 方式一：继承父类LoginRequiredMixin(auth子应用)
 # LoginRequiredMixin类定义了dispatch方法，实现了is_authenticated认证以及调用super().dispatch()
-# 通过as_view()原理可知，优先调用LoginRequiredMixin的dispatch方法，然后调用View类的dispatch()方法进入到UserInfoView实例的get()
+# 通过as_view()原理可知，优先调用LoginRequiredMixin的dispatch方法，然后调用View类的dispatch()方法分发进入到UserInfoView实例的get()
 # 因此用户未认证会被LoginRequiredMixin类的dispatch方法引导到handle_no_permission()进行处理，即不会进入此视图类，但是会被重定向到LOGIN_URL指定的地址(通常是登录页面)，当用户完成登录又重定向到next，可回到此类视图UserInfoView
 class UserInfoView(LoginRequiredMixin, View):
     # 提供用户中心页面

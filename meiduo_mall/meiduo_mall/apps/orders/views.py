@@ -167,7 +167,7 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
                         new_sales = origin_sales + sku_count
                         # 采用乐观锁：以原始值为条件更新数据库数据，若因并发，原始值被修改过，则返回0表示有资源抢夺，更新数据失败
                         result = SKU.objects.filter(id=sku_id, stock=origin_stock).update(stock=new_stock, sales=new_sales)
-                        if result ==0:
+                        if result == 0:
                             # return http.JsonResponse('下单失败')
                             # 库存10 A用户要买1 但此时下单有B用户资源抢夺买2 即使B下单完成库存依然对A足够 不能因为B的抢夺而告知A下单失败，而是让A再去下单，直至库存不足
 
