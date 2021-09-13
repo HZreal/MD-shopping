@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'carts',                                            # 购物车
     'orders',                                           # 订单
     'payment',                                          # 支付
+    'administrator',                                    # 后台管理
 
 ]
 

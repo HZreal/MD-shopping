@@ -14,7 +14,7 @@ click-repl==0.1.6
 coreapi==2.3.3
 coreschema==0.0.4
 cryptography==3.2.1
-dataclasses==0.8
+dataclasses==0.6
 Django==3.2
 django-crontab==0.7.1
 django-filter==2.4.0
@@ -50,13 +50,13 @@ protobuf==3.13.0
 publicsuffix2==2.20191221
 pyasn1==0.4.8
 pycparser==2.20
-pycryptodomex==3.9.4
+pycryptodomex
 pydivert==2.1.0
 PyMySQL==1.0.2
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
 pyperclip==1.8.2
-python-alipay-sdk==3.0.1
+python-alipay-sdk
 pytz==2021.1
 QQLoginTool==0.3.0
 redis==3.5.3
