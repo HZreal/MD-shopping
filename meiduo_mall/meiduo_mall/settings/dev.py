@@ -99,21 +99,32 @@ INSTALLED_APPS = [
     'orders',                                           # 订单
     'payment',                                          # 支付
     'administrator',                                    # 后台管理
+    'corsheaders',
 
 ]
 
 
 # 中间件
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',                                # 跨域访问中间件，尽可能在最上面，特别是要在生成响应的中间件之前
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.transaction.TransactionMiddleware',           # 在HTTP请求上加事务,作用于其后的中间件(缓存中间件除外),只会影响DATABASES设置中的默认的数据库
+    # 'django.middleware.transaction.TransactionMiddleware',                # 在HTTP请求上加事务,作用于其后的中间件(缓存中间件除外),只会影响DATABASES设置中的默认的数据库
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+# 跨域访问白名单
+CORS_ORIGIN_WHITELIST = (
+    '127.0.0.1:8080',
+    '127.0.0.1:8000',
+    'localhost:8080'
+    'www.meiduo,site:8080',
+    'api.meiduo.site:8080',
+)
+CORS_ALLOW_CREDENTIALS = True     # 允许跨域携带cookie
 
 
 # 此工程的URL配置入口，默认是工程名.urls  可修改但一般不改
