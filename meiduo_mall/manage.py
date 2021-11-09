@@ -16,7 +16,7 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    execute_from_command_line(sys.argv)                    # 接收终端python manage.py runserver 0:8000所有参数
+    execute_from_command_line(sys.argv)                    # 接收终端 python manage.py runserver 0:8000所有参数
 
 
 if __name__ == '__main__':

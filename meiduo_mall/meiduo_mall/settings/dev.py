@@ -53,13 +53,12 @@ DEBUG = True
 # 安全机制：只能以列举的主机进行访问
 # 改变允许方式：加入ip或者域名
 # 此时默认的localhost和127.0.0.1访问需要命令行添加参数访问 python manage.py runserver 127.0.0.1:8000
-ALLOWED_HOSTS = ['localhost',
-                 '127.0.0.1',
-                 '192.168.0.103',
-                 'www.meiduo.site',
-                 'http://www.meiduo.site',
-                 ]
-
+# ALLOWED_HOSTS = ['localhost',
+#                  'http://127.0.0.1',
+#                  'http;//192.168.0.103',
+#                  'http://www.meiduo.site',
+#                  ]
+ALLOWED_HOSTS = ['*']
 
 
 # 查看导包路径(或者说模块搜索路径PYTHONPATH)
@@ -119,11 +118,11 @@ MIDDLEWARE = [
 ]
 # 跨域访问白名单
 CORS_ORIGIN_WHITELIST = (
-    '127.0.0.1:8080',
-    '127.0.0.1:8000',
-    'localhost:8080'
-    'www.meiduo,site:8080',
-    'api.meiduo.site:8080',
+    'http://127.0.0.1:8080',
+    'http://127.0.0.1:8000',
+    'http://localhost:8080',
+    'http://www.meiduo,site:8080',
+    'http://api.meiduo.site:8080',
 )
 CORS_ALLOW_CREDENTIALS = True     # 允许跨域携带cookie
 
