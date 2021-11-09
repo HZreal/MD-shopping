@@ -53,4 +53,6 @@ urlpatterns = [
     # 支付子应用
     path('', include(('payment.urls', 'payment'), namespace='payment')),
 
+    # 后台管理
+    path('administrator/', include(('administrator.urls', 'administrator'), namespace='administrator')),
 ]

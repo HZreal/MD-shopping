@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os, sys     # 早期dirs列表设置模板路径用os.path.join()
+import datetime
 from pathlib import Path
 
 
@@ -125,6 +126,21 @@ CORS_ORIGIN_WHITELIST = (
     'api.meiduo.site:8080',
 )
 CORS_ALLOW_CREDENTIALS = True     # 允许跨域携带cookie
+
+
+# JWT配置
+REST_FRAMEWORK  = {
+    # 指定认证
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+JWT_AUTH = {
+    # 指定有效期
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+}
 
 
 # 此工程的URL配置入口，默认是工程名.urls  可修改但一般不改
