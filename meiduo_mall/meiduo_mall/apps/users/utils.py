@@ -26,16 +26,28 @@ class UsernameMobileBackend(ModelBackend):
     # 需要在配置信息中设置自定义用户认证后端：AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileAuthBackend']
 
     # 重写父类的authenticate()方法
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        # 使用账号查询用户
-        user = get_user_by_account(username)          # 用户名或者手机号查询返回的用户对象
+    def authenticate(self, request=None, username=None, password=None, **kwargs):
+        # 前台普通用户登录, request非空。因为前台调用时传了request
+        if request is not None:
+            # 使用账号查询用户
+            user = get_user_by_account(username)  # 用户名或者手机号查询返回的用户对象
 
-        # 如果查到，则校验密码是否正确
-        if user and user.check_password(password):
-            # 认证通过则返回user对象
-            return user
+            # 如果查到，则校验密码是否正确
+            if user and user.check_password(password):
+                # 认证通过则返回user对象
+                return user
+            else:
+                return None
+
+        # 后台管理员登录时，request为None。 因为后台请求JWT认证时，调用序列化器认证方法authenticate(**credentials)时没有传request参数
         else:
-            return None
+            try:
+                # user = User.objects.get(username=username, is_superuser=True)
+                user = User.objects.filter(username=username, is_superuser=True).first()
+            except Exception:
+                return None
+            if user and user.check_password(password):
+                return user
 
 
 # 生成邮件验证地址
