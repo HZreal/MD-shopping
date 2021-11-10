@@ -57,8 +57,8 @@ def generate_email_url(user_id, email):
     return verify_email_url
 
 
+# 反序列化token
 def check_verify_email_token(token):
-    # 反序列化token
     s = Serializer(settings.SECRET_KEY, constants.VERIFY_EMAIL_TOKEN_EXPIRES)
 
     try:

@@ -99,7 +99,7 @@ INSTALLED_APPS = [
     'orders',                                           # 订单
     'payment',                                          # 支付
     'administrator',                                    # 后台管理
-    'corsheaders',
+    'corsheaders',                                      # 跨域访问
 
 ]
 
@@ -139,6 +139,7 @@ REST_FRAMEWORK  = {
 JWT_AUTH = {
     # 指定有效期
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'administrator.utils.jwt_response_payload_handler',
 }
 
 
@@ -195,11 +196,15 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.94.131',
+        # 'HOST': '192.168.94.131',
+        'HOST': '192.168.3.193',
         'PORT': '3306',
-        'USER': 'huangzhen',
-        'PASSWORD': 'root',
-        'NAME': 'meiduo',
+        # 'USER': 'huangzhen',
+        'USER': 'root',
+        # 'PASSWORD': 'root',
+        'PASSWORD': 'root123456',
+        # 'NAME': 'meiduo',
+        'NAME': 'mdshopping',
     },
 
     'slave': {               # 从机读
