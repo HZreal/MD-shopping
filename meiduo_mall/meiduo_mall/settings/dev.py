@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     'orders',                                           # 订单
     'payment',                                          # 支付
     'administrator',                                    # 后台管理
+    'rest_framework',                                   # DRF
     'corsheaders',                                      # 跨域访问
 
 ]
@@ -127,18 +128,27 @@ CORS_ORIGIN_WHITELIST = (
 CORS_ALLOW_CREDENTIALS = True     # 允许跨域携带cookie
 
 
-# JWT配置
+# DRF配置（全局DRF视图生效）
 REST_FRAMEWORK  = {
-    # 指定认证
+    # 认证
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',     # JWT认证
+        'rest_framework.authentication.SessionAuthentication',              # session认证
+        'rest_framework.authentication.BasicAuthentication',                # 表单登录认证
     ),
+    # 权限
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',                       # 仅通过认证的用户
+        # 'rest_framework.permissions.IsAdminUser',                         # 仅管理员
+        # 'rest_framework.permissions.AllowAny',                            # 允许所有
+        # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',           # 认证的用户只能get读取
+    )
 }
 JWT_AUTH = {
     # 指定有效期
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',                     # 设置 请求头中的前缀，不写默认是"JWT "
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'administrator.utils.jwt_response_payload_handler',
 }
 
