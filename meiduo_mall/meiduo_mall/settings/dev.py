@@ -207,14 +207,14 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
         # 'HOST': '192.168.94.131',
-        'HOST': '192.168.3.193',
+        'HOST': 'localhost',
         'PORT': '3306',
         # 'USER': 'huangzhen',
         'USER': 'root',
         # 'PASSWORD': 'root',
         'PASSWORD': 'root123456',
         # 'NAME': 'meiduo',
-        'NAME': 'mdshopping',
+        'NAME': 'md_shopping',
     },
 
     'slave': {               # 从机读
@@ -242,8 +242,8 @@ CACHES = {
     # 默认存储在0号库(缓存)
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",                    # 去找中间件
-        # "LOCATION": "redis://127.0.0.1:6379/0",                      # 网络通信三要素：协议，ip，port
-        "LOCATION": "redis://192.168.94.131:6379/0",                   # 远程redis的0号库
+        "LOCATION": "redis://127.0.0.1:6379/0",                      # 网络通信三要素：协议，ip，port
+        # "LOCATION": "redis://192.168.94.131:6379/0",                   # 远程redis的0号库
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -252,7 +252,8 @@ CACHES = {
     # session存储在1号库
     "session": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.94.131:6379/1",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        # "LOCATION": "redis://192.168.94.131:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -261,7 +262,8 @@ CACHES = {
     # 验证码存储在2号库
     "verify_code": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.94.131:6379/2",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        # "LOCATION": "redis://192.168.94.131:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -270,7 +272,8 @@ CACHES = {
     # 用户商品浏览记录
     "history": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.94.131:6379/3",
+        "LOCATION": "redis://127.0.0.1:6379/3",
+        # "LOCATION": "redis://192.168.94.131:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -279,7 +282,8 @@ CACHES = {
     # 用户购物车
     "carts": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.94.131:6379/4",
+        "LOCATION": "redis://127.0.0.1:6379/4",
+        # "LOCATION": "redis://192.168.94.131:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

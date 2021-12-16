@@ -127,7 +127,7 @@ class LoginView(View):
         # user = User.objects.get(username=username)
         # user.check_password(password)                                         # 父类提供的校验密码方法
         # 系统用户认证后端提供authenticate认证方法，封装了check_password()等操作，定义在auth.backends.ModelBackend类中，但无法用手机号认证，需要需要自定义用户认证后端，重写authenticate方法
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=username, password=password)
         if user is None:
             return render(request, 'login.html', {'account_error_msg': '账户或密码错误'})
 
