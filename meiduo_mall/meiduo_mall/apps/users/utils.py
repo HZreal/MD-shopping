@@ -28,7 +28,7 @@ class UsernameMobileBackend(ModelBackend):
     # 重写父类的authenticate()方法
     def authenticate(self, request=None, username=None, password=None, **kwargs):
         # 前台普通用户登录, request非空。因为前台调用时传了request
-        if request is not None:
+        if request:
             # 使用账号查询用户
             user = get_user_by_account(username)  # 用户名或者手机号查询返回的用户对象
 
@@ -46,8 +46,14 @@ class UsernameMobileBackend(ModelBackend):
                 user = User.objects.filter(username=username, is_superuser=True).first()
             except Exception:
                 return None
-            if user and user.check_password(password):
-                return user
+            if user:
+                if user.check_password(password):
+                    return user
+                else:
+                    return None
+            else:
+                return None
+
 
 
 # 生成邮件验证地址
