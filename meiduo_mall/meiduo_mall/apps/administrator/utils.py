@@ -38,10 +38,10 @@ class CustomPagination(PageNumberPagination):
     # 重写分页返回方法，按照指定的字段进行分页数据返回
     def get_paginated_response(self, data):
         return Response({
-            'count': self.page.paginator.count,        # 总数量
-            'lists': data,                             # 用户数据
+            'total': self.page.paginator.count,        # 总数量
+            'data': data,                             # 用户数据
             'page': self.page.number,                  # 当前页数
-            'pages': self.page.paginator.num_pages,    # 总页数
+            'total_pages': self.page.paginator.num_pages,    # 总页数
             'pagesize': self.page_size                 # 后端指定的页容量
 
         })

@@ -1,4 +1,4 @@
-from fdfs_client.client import Fdfs_client
+# from fdfs_client.client import Fdfs_client
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -35,6 +35,7 @@ class ImageView(ModelViewSet):
         s = SKUSeriazlier(data, many=True)
         return Response(s.data)
 
+"""
     # 重写拓展类的保存业务逻辑
     def create(self, request, *args, **kwargs):
         # 创建FastDFS连接对象
@@ -98,7 +99,7 @@ class ImageView(ModelViewSet):
             },
             status=201  # 前端需要接受201状态码
         )
-
+"""
 
 class SKUGoodsView(ModelViewSet):
     """
