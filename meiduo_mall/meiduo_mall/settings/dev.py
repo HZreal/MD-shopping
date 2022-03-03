@@ -111,7 +111,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.transaction.TransactionMiddleware',                # 在HTTP请求上加事务,作用于其后的中间件(缓存中间件除外),只会影响DATABASES设置中的默认的数据库
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -197,15 +197,16 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
         # 'HOST': '192.168.94.131',
-        'HOST': '192.168.3.193',
+        'HOST': 'localhost',
         'PORT': '3306',
         # 'USER': 'huangzhen',
         'USER': 'root',
         # 'PASSWORD': 'root',
         'PASSWORD': 'root123456',
         # 'NAME': 'meiduo',
-        'NAME': 'mdshopping',
+        'NAME': 'md_shopping',
     },
+
 
     'slave': {               # 从机读
         'ENGINE': 'django.db.backends.mysql',
