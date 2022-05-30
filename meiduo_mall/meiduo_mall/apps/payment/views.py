@@ -35,9 +35,9 @@ class PaymentView(LoginRequiredJSONMixin, View):
             appid=settings.ALIPAY_APPID,
             # 默认的异步回调地址，这里不传下面采用同步回调return_url形式
             app_notify_url=None,
-            # 应用私钥
+            # 应用私钥，客户端用于签名
             app_private_key_string=app_private_key_string,
-            # 支付宝公钥
+            # 支付宝公钥，客户端用于解密
             alipay_public_key_string=alipay_public_key_string,
             # 签名类型
             sign_type='RSA2',
@@ -71,7 +71,7 @@ class PaymentStatusView(View):
         query_dict = request.GET
         # 参数转成标准字典类型
         data = query_dict.dict()
-        # 参数中移除sign并提取其余参数进行签名验证
+        # 参数中移除sign并提取其余参数进行验签
         signature = data.pop('sign')                            # 字典的pop方法
 
         # 使用SDK对象，调用验证通知接口函数进行验证
@@ -83,7 +83,7 @@ class PaymentStatusView(View):
             sign_type='RSA2',
             debug=settings.ALIPAY_DEBUG,
         )
-        success = alipay.verify(data, signature)           # 返回bool类型，验证成功返回True
+        success = alipay.verify(data, signature)               # 返回bool类型，验证成功返回True
         # 验证通过后对支付状态进行处理(保存订单编号和交易编号，修改订单状态)
         if not success:
             # 验证失败则拒绝此次请求
