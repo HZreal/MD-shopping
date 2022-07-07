@@ -16,7 +16,6 @@ class FastDFSStorage(Storage):
         # self.fdfs_base_url = fdfs_base_url
         self.fdfs_base_url = fdfs_base_url or settings.FDFS_BASE_URL
 
-
     # 打开文件时会被调用(官方文档required)：参数name为文件路径，mode为打开方式
     def _open(self, name, mode='rb'):
         # 当前需求不是打开某个文件，此方法目前无用，但又必须重写
@@ -27,7 +26,6 @@ class FastDFSStorage(Storage):
         # 当前无需求，但必须重写，后续学习后台管理系统时再具体重写，实现文件上传到FastDFS服务器
         pass
 
-
     # url()方法 返回name所代表的文件内容的URL   参数name为传入的目录，缺少协议,ip,端口
     # 表面上调用的是ImageField的url方法。但是内部会去调用文件存储类的url()方法
     def url(self, name):
@@ -36,21 +34,9 @@ class FastDFSStorage(Storage):
         # return settings.FDFS_BASE_URL + name
         return self.fdfs_base_url + name
 
-
-
     # 自定义重写
     # Storage.delete()
     # Storage.exists()
     # Storage.listdir()
     # Storage.size()
     # Storage.url()
-
-
-
-
-
-
-
-
-
-

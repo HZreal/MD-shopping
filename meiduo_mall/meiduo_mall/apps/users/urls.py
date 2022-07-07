@@ -12,6 +12,9 @@ urlpatterns = [
 
     # 调用as_view()返回view，调用view()返回dispatch，dispatch起着请求映射分发的作用，引导到类视图的对应请求函数
 
+    # for test
+    path('test/', views.json_view_test, name='first_test'),
+
     # 用户注册
     path('register/', views.RegisterView.as_view(), name='register'),
 

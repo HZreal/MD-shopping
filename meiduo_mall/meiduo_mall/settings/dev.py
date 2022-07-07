@@ -228,7 +228,8 @@ DATABASES = {
     }
 }
 # 指定数据库读写路由(需开启主从服务器)
-# DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
+# 数据库操作会按照此列表顺序匹配后进行
+# DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter', '']
 
 
 # session数据的存储方式可以如下:

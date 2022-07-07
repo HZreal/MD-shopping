@@ -22,6 +22,9 @@ from carts.utils import merge_cart_cookies_redis
 # 创建日志器
 logger = logging.getLogger('django')
 
+def json_view_test(request):
+    return http.JsonResponse({'code': 0, 'msg': 'for test', 'data': None})
+
 # 注册
 class RegisterView(View):
     # 前后端不分离，由后端提供注册页面
