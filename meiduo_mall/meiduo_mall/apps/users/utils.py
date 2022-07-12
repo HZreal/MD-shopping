@@ -39,7 +39,7 @@ class UsernameMobileBackend(ModelBackend):
             else:
                 return None
 
-        # 后台管理员登录时，request为None。 因为后台请求JWT认证时，调用序列化器认证方法authenticate(**credentials)时没有传request参数
+        # TODO 后台管理员登录时，request为None。 因为后台请求JWT认证时，调用序列化器认证方法authenticate(**credentials)时没有传request参数
         else:
             try:
                 # user = User.objects.get(username=username, is_superuser=True)

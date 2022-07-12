@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django import http
 from django.urls import reverse
@@ -129,8 +130,9 @@ class LoginView(View):
         # 认证用户
         # user = User.objects.get(username=username)
         # user.check_password(password)                                         # 父类提供的校验密码方法
-        # 系统用户认证后端提供authenticate认证方法，封装了check_password()等操作，定义在auth.backends.ModelBackend类中，但无法用手机号认证，需要需要自定义用户认证后端，重写authenticate方法
-        user = authenticate(request, username=username, password=password)
+        # 系统默认的用户认证后端定义在django.contrib.auth.backends.ModelBackend类中，提供authenticate认证方法，封装了check_password()等操作
+        # 但无法用手机号认证，需要需要自定义用户认证后端、重写authenticate方法，并在配置中替换默认的认证后端
+        user: User = authenticate(request, username=username, password=password)               # 调用django.contrib.auth.backends.ModelBackend.authenticate获取的认证后端为自定义的认证后端
         if user is None:
             return render(request, 'login.html', {'account_error_msg': '账户或密码错误'})
 
@@ -181,6 +183,11 @@ class LogoutView(View):
 # 通过as_view()原理可知，优先调用LoginRequiredMixin的dispatch方法，然后调用View类的dispatch()方法分发进入到UserInfoView实例的get()
 # 因此用户未认证会被LoginRequiredMixin类的dispatch方法引导到handle_no_permission()进行处理，即不会进入此视图类，但是会被重定向到LOGIN_URL指定的地址(通常是登录页面)，当用户完成登录又重定向到next，可回到此类视图UserInfoView
 class UserInfoView(LoginRequiredMixin, View):
+
+    # LoginRequiredMixin类有两个配置参数(详看源码)
+    login_url = '/login/'           # 验证失败重定向的路由，若在dev.py中全局配置，则每个需要验证的类视图中就不用写
+    # redirect_field_name = REDIRECT_FIELD_NAME = 'next'      # 默认是next，完成登录又重定向到next，即回到此类视图
+
     # 提供用户中心页面
     def get(self, request):
         # if request.user.is_authenticated:
@@ -188,10 +195,6 @@ class UserInfoView(LoginRequiredMixin, View):
         # else:
         #     return redirect(reverse('users:login'))
         # 以上验证登录逻辑因继承LoginRequiredMixin类自动验证
-
-        # LoginRequiredMixin类有两个配置参数(详看源码)
-        # login_url = '/login/'                 # 验证失败重定向的路由，在配置文件dev.py中设置，则每个需要验证的类视图不用写
-        # redirect_field_name = REDIRECT_FIELD_NAME = 'next'      # 默认是next，完成登录又重定向到next，即回到此类视图
 
         # 当通过LoginRequiredMixin的验证，说明此用户已登录，那么request.user就是当前登录用户，即无需查库获取用户对象
         # 将用户信息通过模板显示在页面：整体刷新
@@ -204,18 +207,25 @@ class UserInfoView(LoginRequiredMixin, View):
 
         return render(request, 'user_center_info.html', context)
 
+# 方式二：用函数login_required
+# 对于函数视图，可以直接用login_required进行装饰
+# @login_required
+# def user_info(request):
+#     pass
 
-# 方式二：用装饰器login_required，可以直接装饰函数视图，此处为类视图无法直接装饰，有以下2种方式：
+# 对于类视图无法直接装饰，可以以下2种方式：
 # 1.装饰as_view()方法，即路由改为 path('info/', login_required(views.UserInfoView.as_view()), name='info'),
 # class UserInfoView(View):
 #     def get(self, request):
 #         pass
-# 2.定义obejct子类封装login_required装饰器，在dispatch分发之前做login_required装饰验证
+
+# 2.自定义Mixin类，定义as_view方法封装login_required，使在dispatch分发之前做login_required装饰验证
+# 此方法结合login_required函数截获处理as_view，借鉴django默认的LoginRequiredMixin截获处理dispatch的方式
 # from django.contrib.auth.decorators import login_required
 # class LoginRequiredMixin2(object):            # 继承自object而非View，这样不依赖任何视图，复用性强
 #     @classmethod
-#     def as_view(cls, **initkwargs):            # 自定义as_view，调用父类的as_view()方法
-#         view = super().as_view()
+#     def as_view(cls, **initkwargs):            # 自定义as_view
+#         view = super().as_view()               # 调用子类的父类的as_view()方法，实际是调用View的as_view
 #         return login_required(view)
 # class UserInfoView(LoginRequiredMixin2, View):
 #     def get(self, request):

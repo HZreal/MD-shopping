@@ -42,7 +42,7 @@ celery_app.autodiscover_tasks(['celery_tasks.sms', 'celery_tasks.email'])
 # TODO rabbitMQ
 
 
-# 在能够看到celery_tasks包的目录meiduo_mall下终端执行celery -A celery_tasks.main worker -l info启动celery服务器
+# 在能够看到celery_tasks包的目录meiduo_mall下终端执行celery -A celery_tasks.main worker -l info 启动celery服务器
 #  -A 指定入口，参数worker即celery执行者， -l info为日志等级
 #  -c 指定并发的进程个数(默认每个CPU开4个)，比如1000个，但是进程过于耗费资源，可引入协程：即-P eventlet -c 1000
 

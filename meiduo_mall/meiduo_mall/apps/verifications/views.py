@@ -74,7 +74,7 @@ class SMSCodeView(View):
         if not client_image_code.lower() == server_image_code.lower():           # 错误码4001
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'error_message': '图形验证码输入有误'})
 
-        # 生成的6位短信验证码
+        # 图形验证码正确，则生成的6位短信验证码
         sms_code = '%06d' % random.randint(0, 999999)
         logger.info(sms_code)                         # 手动输出日志
 

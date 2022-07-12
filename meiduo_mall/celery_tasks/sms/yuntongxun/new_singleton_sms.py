@@ -71,7 +71,7 @@ if __name__ == '__main__':
     # 使用单例调用，参数都是字符串
     sms_code = '%06d' % random.randint(0, 999999)
     print(sms_code)    # 512261
-    CCP().send_message(tid=1, mobile='15872060069', datas=(sms_code, 5))
+    CCP().send_message(tid=1, mobile='15872060069', datas=(sms_code, 5))      # 5分钟有效期
     # CCP().send_message(tid=1, mobile='15926750521', datas=(sms_code, 5))
     # CCP().send_message(tid='1', mobile='15926750521', datas=('637596', '5'))
 
