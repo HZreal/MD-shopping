@@ -1,3 +1,7 @@
+# python 3.8
+# 有 C 扩展包，需要安装 python3-dev build-essential 工具，如 sudo apt-get install python3-dev build-essential
+# 注意 pip 的版本，低于 24.1
+pip==22.1.2
 amqp==5.0.9
 asgiref==3.5.0
 billiard==3.6.4.0
